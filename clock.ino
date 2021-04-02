@@ -91,6 +91,27 @@ static void displayDigits(void *user, uint16_t millis_elapsed) {
   displayDigitsDec(&displayCtl, digits[0], digits[1], digits[2], digits[3]);
 }
 
+static void setupTimer1Interrupts() {
+  // Timer will interrupt every millisecond
+  // Clear timer control registers
+  TCCR1A = TCCR1B = 0;
+  // Clear timer counter
+  TCNT1 = 0;
+  // Set waveform generation mode to mode 12 (Clear Timer on Compare)
+  TCCR1B |= (1 << WGM12);
+  // Set Compare Match Register to 63
+  OCR1A = 249;
+  // Set clock select bits in the Timer Control Register B to 0b011
+  // which means the prescaler will be 64.
+  TCCR1B |= (1 << CS11) | (1 << CS10);
+  // Enable timer compare interrupt
+  TIMSK1 |= (1 << OCIE1A);
+}
+
+ISR(TIMER1_COMPA_vect) {
+    timerAddTimeElapsed(TIMER_ID1, 1);
+}
+
 void setup() {
   uint8_t rc;
   Serial.begin(9600);
@@ -111,9 +132,10 @@ void setup() {
   digits[0] = digits[1] = digits[2] = digits[3] = 0;
 
   cli();
-  timerSetup(TIMER_ID1);
+  setupTimer1Interrupts();
   sei();
 
+  timerSetup(TIMER_ID1);
   timekeeperInit(tkTime);
 
   actionsInit();
