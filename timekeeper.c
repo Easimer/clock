@@ -48,7 +48,7 @@ int timekeeperAccumulate(timekeeper_t *tk, uint16_t milliseconds) {
     int ret = 0;
 
     if(tk->flags & TIMEKEEPER_FLAG_WASSET) {
-        ret = 1;
+        ret = 3;
         tk->flags &= ~TIMEKEEPER_FLAG_WASSET;
     }
 
@@ -72,6 +72,7 @@ int timekeeperAccumulate(timekeeper_t *tk, uint16_t milliseconds) {
     while(tk->seconds >= 60) {
         tk->seconds -= 60;
         tk->minutes += 1;
+        ret = 2;
     }
 
     assert(tk->seconds < 60);
@@ -79,12 +80,14 @@ int timekeeperAccumulate(timekeeper_t *tk, uint16_t milliseconds) {
     while(tk->minutes >= 60) {
         tk->minutes -= 60;
         tk->hours += 1;
+        ret = 3;
     }
 
     assert(tk->minutes < 60);
 
     while(tk->hours >= 24) {
         tk->hours -= 24;
+        ret = 3;
     }
 
     assert(tk->hours < 60);

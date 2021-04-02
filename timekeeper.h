@@ -60,6 +60,11 @@ void timekeeperGet(timekeeper_t const *tk, uint8_t *hours, uint8_t *minutes, uin
  * @param milliseconds Number of milliseconds to add
  * @return A value indicating whether the state of the timekeeper
  * changed since the last call to timekeeperAccumulate.
+ * This value is
+ * - 0 if there was no change;
+ * - 1 if only the `seconds` counter has changed,
+ * - 2 if also the `minutes` counter has changed and
+ * - 3 if the `hours` counter has changed as well.
  */
 int timekeeperAccumulate(timekeeper_t *tk, uint16_t milliseconds);
 
