@@ -1,6 +1,8 @@
+#include "config.h"
 #include <Arduino.h>
 #include "display.h"
 #include "timekeeper.h"
+#include "interrupts.h"
 
 typedef struct display_pins {
   uint8_t digit[4];
@@ -8,8 +10,15 @@ typedef struct display_pins {
 } display_pins_t;
 
 static struct display_pins displayPins = {
-  .digit = { 10, 11, 12, 13 },
-  .segment = { 22, 23, 24, 25, 26, 27, 28 },
+  .digit = {
+    PIN_DISPLAY_DIGIT0, PIN_DISPLAY_DIGIT1,
+    PIN_DISPLAY_DIGIT2, PIN_DISPLAY_DIGIT3
+  },
+  .segment = {
+    PIN_DISPLAY_SEGMENT_A, PIN_DISPLAY_SEGMENT_B, PIN_DISPLAY_SEGMENT_C, 
+    PIN_DISPLAY_SEGMENT_D, PIN_DISPLAY_SEGMENT_E, PIN_DISPLAY_SEGMENT_F, 
+    PIN_DISPLAY_SEGMENT_G
+  },
 };
 
 static void display_select_cb(void *context, uint8_t digit) {
@@ -39,26 +48,10 @@ static display_ctl_t displayCtl = {
 static uint8_t digits[4];
 static uint16_t then = 0;
 TIMEKEEPER_DECLARE_BUFFER(tkTime);
+static timer_subscription_t subscriptionDisplayDigits;
 
-ISR(TIMER1_COMPA_vect) {
+static void displayDigits(void *user, uint16_t millis_elapsed) {
   display_digits_dec(&displayCtl, digits[0], digits[1], digits[2], digits[3]);
-}
-
-static void setup_interrupts() {
-  cli();
-
-  // Setup timer1 to tick at 60Hz
-  TCCR1A = 0;
-  TCCR1B = 0;
-  TCNT1 = 0;
-  // Compare match register = 63
-  OCR1A = 63;
-  TCCR1B |= (1 << WGM12);
-  // Prescaler = 1024
-  TCCR1B |= (1 << CS12) | (1 << CS10);
-  TIMSK1 |= (1 << OCIE1A);
-
-  sei();
 }
 
 void setup() {
@@ -79,7 +72,12 @@ void setup() {
 
   timekeeper_init(tkTime);
 
-  setup_interrupts();
+  cli();
+
+  timer_setup(TIMER_ID1);
+  timer_subscribe(TIMER_ID1, &subscriptionDisplayDigits, NULL, displayDigits);
+
+  sei();
 }
 
 static void decomposeDigits(uint8_t num, uint8_t *dh, uint8_t *dl) {
@@ -92,13 +90,13 @@ void loop() {
   uint16_t elapsed = now - then;
   then = now;
 
-  timekeeper_accumulate(tkTime, elapsed);
+  if(timekeeper_accumulate(tkTime, elapsed)) {
+    uint8_t hours, minutes, seconds;
+    timekeeper_get(tkTime, &hours, &minutes, &seconds);
 
-  uint8_t hours, minutes, seconds;
-  timekeeper_get(tkTime, &hours, &minutes, &seconds);
-
-  decomposeDigits(hours, &digits[0], &digits[1]);
-  decomposeDigits(minutes, &digits[2], &digits[3]);
+    decomposeDigits(hours, &digits[0], &digits[1]);
+    decomposeDigits(minutes, &digits[2], &digits[3]);
+  }
 }
 
 #include "display.c"

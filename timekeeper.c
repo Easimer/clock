@@ -28,11 +28,14 @@ void timekeeper_get(timekeeper_t const *tk, uint8_t *hours, uint8_t *minutes, ui
     *seconds = tk->seconds;
 }
 
-void timekeeper_accumulate(timekeeper_t *tk, uint16_t milliseconds) {
+int timekeeper_accumulate(timekeeper_t *tk, uint16_t milliseconds) {
+    int ret = 0;
+
     // Avoid overflow due to addition
     while(milliseconds >= 1000) {
         tk->seconds += 1;
         milliseconds -= 1000;
+        ret = 1;
     }
 
     tk->millis += milliseconds;
@@ -40,6 +43,7 @@ void timekeeper_accumulate(timekeeper_t *tk, uint16_t milliseconds) {
     while(tk->millis >= 1000) {
         tk->millis -= 1000;
         tk->seconds += 1;
+        ret = 1;
     }
 
     assert(tk->millis < 1000);
@@ -63,4 +67,6 @@ void timekeeper_accumulate(timekeeper_t *tk, uint16_t milliseconds) {
     }
 
     assert(tk->hours < 60);
+
+    return ret;
 }
