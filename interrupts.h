@@ -22,9 +22,9 @@ typedef enum timer_status {
 #ifdef __cplusplus
 extern "C" {
 #endif
-    void timer_setup(timer_id_t id);
-    timer_status_t timer_subscribe(timer_id_t id, timer_subscription_t *handle, void *user, timer_callback_t callback);
-    void timer_unsubscribe(timer_id_t id, timer_subscription_t handle);
+    void timerSetup(timer_id_t id);
+    timer_status_t timerSubscribe(timer_id_t id, timer_subscription_t *handle, void *user, timer_callback_t callback);
+    void timerUnsubscribe(timer_id_t id, timer_subscription_t handle);
 #ifdef __cplusplus
 }
 #endif

@@ -16,7 +16,7 @@ typedef struct timer_state {
 
 static timer_state_t timerStates[3];
 
-void timer_setup(timer_id_t id) {
+void timerSetup(timer_id_t id) {
     if (id > TIMER_ID2) {
         return;
     }
@@ -43,7 +43,7 @@ void timer_setup(timer_id_t id) {
     }
 }
 
-timer_status_t timer_subscribe(timer_id_t id, timer_subscription_t *handle, void *user, timer_callback_t callback) {
+timer_status_t timerSubscribe(timer_id_t id, timer_subscription_t *handle, void *user, timer_callback_t callback) {
     if(id > TIMER_ID2 || handle == NULL || callback == NULL) {
         return ETIMER_INVAL;
     }
@@ -67,7 +67,7 @@ timer_status_t timer_subscribe(timer_id_t id, timer_subscription_t *handle, void
     return ETIMER_MAX_SUBSCRIBERS;
 }
 
-void timer_unsubscribe(timer_id_t id, timer_subscription_t handle);
+void timerUnsubscribe(timer_id_t id, timer_subscription_t handle);
 
 ISR(TIMER1_COMPA_vect) {
     timer_state_t *state = &timerStates[TIMER_ID1];

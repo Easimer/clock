@@ -3,6 +3,7 @@
 #include "display.h"
 #include "timekeeper.h"
 #include "interrupts.h"
+#include "actions.h"
 
 typedef struct display_pins {
   uint8_t digit[4];
@@ -50,11 +51,48 @@ static uint16_t then = 0;
 TIMEKEEPER_DECLARE_BUFFER(tkTime);
 static timer_subscription_t subscriptionDisplayDigits;
 
+static void probeButton(actions_button_handle_t handle, void *user);
+static void clickButton(actions_button_handle_t handle, void *user);
+static void longPress(actions_button_handle_t handle, void *user);
+
+static actions_button_handle_t btnIncreaseMinutes;
+static actions_button_descriptor_t btnIncreaseMinutesDescriptor = {
+  .probe = probeButton,
+  .pressed = NULL,
+  .released = NULL,
+  .click = clickButton,
+  .longPress = longPress,
+  .doubleClick = NULL,
+};
+
+static void probeButton(actions_button_handle_t handle, void *user) {
+  actionsSetButtonState(btnIncreaseMinutes, (digitalRead(PIN_BUTTON_3) == HIGH) ? 1 : 0);
+}
+
+static void clickButton(actions_button_handle_t handle, void *user) {
+  if(handle == btnIncreaseMinutes) {
+    uint8_t hours, minutes, seconds;
+    timekeeperGet(tkTime, &hours, &minutes, &seconds);
+    minutes++; // timekeeperSet will handle any overflow
+    timekeeperSet(tkTime, hours, minutes);
+  }
+}
+
+static void longPress(actions_button_handle_t handle, void *user) {
+  if(handle == btnIncreaseMinutes) {
+    uint8_t hours, minutes, seconds;
+    timekeeperGet(tkTime, &hours, &minutes, &seconds);
+    hours++; // timekeeperSet will handle any overflow
+    timekeeperSet(tkTime, hours, minutes);
+  }
+}
+
 static void displayDigits(void *user, uint16_t millis_elapsed) {
-  display_digits_dec(&displayCtl, digits[0], digits[1], digits[2], digits[3]);
+  displayDigitsDec(&displayCtl, digits[0], digits[1], digits[2], digits[3]);
 }
 
 void setup() {
+  uint8_t rc;
   Serial.begin(9600);
   Serial.println("Init");
 
@@ -68,16 +106,23 @@ void setup() {
     digitalWrite(displayPins.segment[i], LOW);
   }
 
+  pinMode(PIN_BUTTON_3, INPUT);
+
   digits[0] = digits[1] = digits[2] = digits[3] = 0;
 
-  timekeeper_init(tkTime);
-
   cli();
-
-  timer_setup(TIMER_ID1);
-  timer_subscribe(TIMER_ID1, &subscriptionDisplayDigits, NULL, displayDigits);
-
+  timerSetup(TIMER_ID1);
   sei();
+
+  timekeeperInit(tkTime);
+
+  actionsInit();
+  if((rc = actionsCreateButton(&btnIncreaseMinutes, NULL, &btnIncreaseMinutesDescriptor)) != EACTIONS_OK) {
+    Serial.print("actionsCreateButton failed: ");
+    Serial.println(rc);
+  }
+
+  timerSubscribe(TIMER_ID1, &subscriptionDisplayDigits, NULL, displayDigits);
 }
 
 static void decomposeDigits(uint8_t num, uint8_t *dh, uint8_t *dl) {
@@ -90,9 +135,9 @@ void loop() {
   uint16_t elapsed = now - then;
   then = now;
 
-  if(timekeeper_accumulate(tkTime, elapsed)) {
+  if(timekeeperAccumulate(tkTime, elapsed)) {
     uint8_t hours, minutes, seconds;
-    timekeeper_get(tkTime, &hours, &minutes, &seconds);
+    timekeeperGet(tkTime, &hours, &minutes, &seconds);
 
     decomposeDigits(hours, &digits[0], &digits[1]);
     decomposeDigits(minutes, &digits[2], &digits[3]);
@@ -101,3 +146,4 @@ void loop() {
 
 #include "display.c"
 #include "timekeeper.c"
+#include "actions.c"

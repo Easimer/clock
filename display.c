@@ -23,7 +23,7 @@ static uint8_t digitSegmentBits[16] = {
     0b01110001,
 };
 
-void display_digits_dec(display_ctl_t *ctl, uint8_t d0, uint8_t d1, uint8_t d2, uint8_t d3) {
+void displayDigitsDec(display_ctl_t *ctl, uint8_t d0, uint8_t d1, uint8_t d2, uint8_t d3) {
     if(ctl == NULL) {
         return;
     }

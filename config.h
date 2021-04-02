@@ -14,4 +14,9 @@
 #define PIN_DISPLAY_SEGMENT_F (27)
 #define PIN_DISPLAY_SEGMENT_G (28)
 
+#define PIN_BUTTON_0 (30)
+#define PIN_BUTTON_1 (31)
+#define PIN_BUTTON_2 (32)
+#define PIN_BUTTON_3 (33)
+
 #endif /* CLOCK_CONFIG_H */
