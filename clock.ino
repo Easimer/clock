@@ -4,6 +4,8 @@
 #include "timekeeper.h"
 #include "interrupts.h"
 #include "actions.h"
+#include "eeprom_access.h"
+#include "timesave_io.h"
 
 typedef struct display_pins {
   uint8_t digit[4];
@@ -47,9 +49,9 @@ static display_ctl_t displayCtl = {
 };
 
 static uint8_t digits[4];
-static uint16_t then = 0;
 TIMEKEEPER_DECLARE_BUFFER(tkTime);
 static timer_subscription_t subscriptionDisplayDigits;
+static timer_subscription_t subscriptionAccumulateTime;
 
 static void probeButton(actions_button_handle_t handle, void *user);
 static void clickButton(actions_button_handle_t handle, void *user);
@@ -108,6 +110,65 @@ static void setupTimer1Interrupts() {
   TIMSK1 |= (1 << OCIE1A);
 }
 
+static void saveTimeToEEPROM(timekeeper_t const *tk) {
+  timesave_io_status_t rc;
+  rc = saveTime(tk, extmemGetAccess());
+
+  switch(rc) {
+    case ETIMESAVE_IO_OK:
+      break;
+    case ETIMESAVE_IO_WRITE_FAILURE:
+      Serial.println("[-] timesave: couldn't save time: write failure");
+      break;
+  }
+}
+
+static void restoreTimeFromEEPROM(timekeeper_t *tk) {
+  timesave_io_status_t rc;
+
+  Serial.println("[+] Restoring time from EEPROM...");
+
+  rc = restoreTime(tk, extmemGetAccess());
+
+  switch(rc) {
+    case ETIMESAVE_IO_OK:
+      Serial.println("[+] Restored time");
+      break;
+    case ETIMESAVE_IO_BADSIG:
+      Serial.println("[-] Couldn't restore time: bad signature (old version?)");
+      break;
+    case ETIMESAVE_IO_BADCHK:
+      Serial.println("[-] Couldn't restore time: bad checksum");
+      break;
+  }
+}
+
+static struct {
+  uint8_t minutesElapsed;
+} timesaveState = {
+  .minutesElapsed = 0,
+};
+
+static void accumulateTime(void *user, uint16_t millisElapsed) {
+  int change;
+  if((change = timekeeperAccumulate(tkTime, millisElapsed)) != 0) {
+    uint8_t hours, minutes, seconds;
+    timekeeperGet(tkTime, &hours, &minutes, &seconds);
+
+    decomposeDigits(minutes, &digits[0], &digits[1]);
+    decomposeDigits(seconds, &digits[2], &digits[3]);
+
+    if(change > 1) {
+      timesaveState.minutesElapsed += 1;
+
+      if(timesaveState.minutesElapsed > 10) {
+        saveTimeToEEPROM(tkTime);
+        timesaveState.minutesElapsed = 0;
+      }
+    }
+  }
+}
+
 ISR(TIMER1_COMPA_vect) {
     timerAddTimeElapsed(TIMER_ID1, 1);
 }
@@ -115,7 +176,8 @@ ISR(TIMER1_COMPA_vect) {
 void setup() {
   uint8_t rc;
   Serial.begin(9600);
-  Serial.println("Init");
+
+  Serial.println("[+] Initializing display");
 
   for(uint8_t i = 0; i < 4; i++) {
     pinMode(displayPins.digit[i], OUTPUT);
@@ -127,17 +189,26 @@ void setup() {
     digitalWrite(displayPins.segment[i], LOW);
   }
 
+  Serial.println("[+] Initializing EEPROM");
+  extmemInit();
+
+  Serial.println("[+] Initializing buttons");
   pinMode(PIN_BUTTON_3, INPUT);
 
   digits[0] = digits[1] = digits[2] = digits[3] = 0;
 
+  Serial.println("[+] Initializing timers");
   cli();
   setupTimer1Interrupts();
   sei();
 
   timerSetup(TIMER_ID1);
-  timekeeperInit(tkTime);
 
+  Serial.println("[+] Creating main timekeeper");
+  timekeeperInit(tkTime);
+  restoreTimeFromEEPROM(tkTime);
+
+  Serial.println("[+] Setting up actions subsystem");
   actionsInit();
   if((rc = actionsCreateButton(&btnIncreaseMinutes, NULL, &btnIncreaseMinutesDescriptor)) != EACTIONS_OK) {
     Serial.print("actionsCreateButton failed: ");
@@ -145,6 +216,9 @@ void setup() {
   }
 
   timerSubscribe(TIMER_ID1, &subscriptionDisplayDigits, NULL, displayDigits);
+  timerSubscribe(TIMER_ID1, &subscriptionAccumulateTime, NULL, accumulateTime);
+
+  Serial.println("[+] Init OK");
 }
 
 static void decomposeDigits(uint8_t num, uint8_t *dh, uint8_t *dl) {
@@ -153,17 +227,6 @@ static void decomposeDigits(uint8_t num, uint8_t *dh, uint8_t *dl) {
 }
 
 void loop() {
-  uint16_t now = millis();
-  uint16_t elapsed = now - then;
-  then = now;
-
-  if(timekeeperAccumulate(tkTime, elapsed)) {
-    uint8_t hours, minutes, seconds;
-    timekeeperGet(tkTime, &hours, &minutes, &seconds);
-
-    decomposeDigits(hours, &digits[0], &digits[1]);
-    decomposeDigits(minutes, &digits[2], &digits[3]);
-  }
 }
 
 #include "display.c"

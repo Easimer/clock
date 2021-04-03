@@ -48,7 +48,7 @@ int timekeeperAccumulate(timekeeper_t *tk, uint16_t milliseconds) {
     int ret = 0;
 
     if(tk->flags & TIMEKEEPER_FLAG_WASSET) {
-        ret = 3;
+        ret = -3;
         tk->flags &= ~TIMEKEEPER_FLAG_WASSET;
     }
 
