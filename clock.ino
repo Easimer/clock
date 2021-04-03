@@ -148,6 +148,7 @@ static struct {
 } timesaveState = {
   .minutesElapsed = 0,
 };
+static uint8_t saveTimeToROM = 0;
 
 static void accumulateTime(void *user, uint16_t millisElapsed) {
   int change;
@@ -155,14 +156,14 @@ static void accumulateTime(void *user, uint16_t millisElapsed) {
     uint8_t hours, minutes, seconds;
     timekeeperGet(tkTime, &hours, &minutes, &seconds);
 
-    decomposeDigits(minutes, &digits[0], &digits[1]);
-    decomposeDigits(seconds, &digits[2], &digits[3]);
+    decomposeDigits(hours, &digits[0], &digits[1]);
+    decomposeDigits(minutes, &digits[2], &digits[3]);
 
-    if(change > 1) {
+    if(change > 1 || change < -1) {
       timesaveState.minutesElapsed += 1;
 
-      if(timesaveState.minutesElapsed > 10) {
-        saveTimeToEEPROM(tkTime);
+      if(timesaveState.minutesElapsed >= 10) {
+        saveTimeToROM = 1;
         timesaveState.minutesElapsed = 0;
       }
     }
@@ -227,6 +228,10 @@ static void decomposeDigits(uint8_t num, uint8_t *dh, uint8_t *dl) {
 }
 
 void loop() {
+  if(saveTimeToROM) {
+    saveTimeToROM = 0;
+    saveTimeToEEPROM(tkTime);
+  }
 }
 
 #include "display.c"
