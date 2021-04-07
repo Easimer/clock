@@ -7,8 +7,20 @@ set(C_STANDARD_REQUIRED ON)
 set(C_EXTENSIONS OFF)
 
 set(SRC_CORE
+  actions.c
+  actions.h
+  display.c
+  display.h
+  config.h
+  eeprom_access.h
   eeprom_he.c
   eeprom_he.h
+  interrupts.c
+  interrupts.h
+  timekeeper.c
+  timekeeper.h
+  timesave_io.c
+  timesave_io.h
 )
 
 set(SRC_TESTS
