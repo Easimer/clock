@@ -66,6 +66,10 @@ int emheInit(emhe_descriptor_t *D) {
 		return 1;
 	}
 
+	if (D->flags & EMHE_F_INITIALIZED) {
+		return 0;
+	}
+
 	if (D->flags & EMHE_F_RESET) {
 		D->pointer = 0;
 		if (zeroStatusBuffer(D) != 0) {
@@ -76,6 +80,8 @@ int emheInit(emhe_descriptor_t *D) {
 			return 1;
 		}
 	}
+
+	D->flags |= EMHE_F_INITIALIZED;
 
 	return 0;
 }

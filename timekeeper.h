@@ -36,8 +36,9 @@ void timekeeperInit(timekeeper_t *buffer);
  * @param tk Pointer to the timekeeper
  * @param hour New value of the hour counter
  * @param minute New value of the minute counter
+ * @param second New value of the second counter
  */
-void timekeeperSet(timekeeper_t *tk, uint8_t hour, uint8_t minute);
+void timekeeperSet(timekeeper_t *tk, uint8_t hour, uint8_t minute, uint8_t second);
 
 /*
  * Reads the hour, minute and second counters from the timekeeper

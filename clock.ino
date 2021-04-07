@@ -50,6 +50,7 @@ static display_ctl_t displayCtl = {
 
 static uint8_t digits[4];
 TIMEKEEPER_DECLARE_BUFFER(tkTime);
+static timesave_io_config_t tsiocTime;
 static timer_subscription_t subscriptionDisplayDigits;
 static timer_subscription_t subscriptionAccumulateTime;
 
@@ -76,7 +77,7 @@ static void clickButton(actions_button_handle_t handle, void *user) {
     uint8_t hours, minutes, seconds;
     timekeeperGet(tkTime, &hours, &minutes, &seconds);
     minutes++; // timekeeperSet will handle any overflow
-    timekeeperSet(tkTime, hours, minutes);
+    timekeeperSet(tkTime, hours, minutes, seconds);
   }
 }
 
@@ -85,7 +86,7 @@ static void longPress(actions_button_handle_t handle, void *user) {
     uint8_t hours, minutes, seconds;
     timekeeperGet(tkTime, &hours, &minutes, &seconds);
     hours++; // timekeeperSet will handle any overflow
-    timekeeperSet(tkTime, hours, minutes);
+    timekeeperSet(tkTime, hours, minutes, seconds);
   }
 }
 
@@ -112,10 +113,14 @@ static void setupTimer1Interrupts() {
 
 static void saveTimeToEEPROM(timekeeper_t const *tk) {
   timesave_io_status_t rc;
-  rc = saveTime(tk, extmemGetAccess());
+  rc = saveTime(tk, &tsiocTime);
 
   switch(rc) {
     case ETIMESAVE_IO_OK:
+      Serial.println("[+] Saved time");
+      break;
+    case ETIMESAVE_IO_ERASED:
+      Serial.println("[+] timesave: first initialization");
       break;
     case ETIMESAVE_IO_WRITE_FAILURE:
       Serial.println("[-] timesave: couldn't save time: write failure");
@@ -128,7 +133,7 @@ static void restoreTimeFromEEPROM(timekeeper_t *tk) {
 
   Serial.println("[+] Restoring time from EEPROM...");
 
-  rc = restoreTime(tk, extmemGetAccess());
+  rc = restoreTime(tk, &tsiocTime);
 
   switch(rc) {
     case ETIMESAVE_IO_OK:
@@ -139,6 +144,15 @@ static void restoreTimeFromEEPROM(timekeeper_t *tk) {
       break;
     case ETIMESAVE_IO_BADCHK:
       Serial.println("[-] Couldn't restore time: bad checksum");
+      break;
+    case ETIMESAVE_IO_READ_FAILURE:
+      Serial.println("[-] Couldn't restore time: read failure");
+      break;
+    case ETIMESAVE_IO_WRITE_FAILURE:
+      Serial.println("[-] Couldn't restore time: write failure");
+      break;
+    case ETIMESAVE_IO_ERASED:
+      Serial.println("[+] Time wasn't restored: first initialization");
       break;
   }
 }
@@ -162,7 +176,7 @@ static void accumulateTime(void *user, uint16_t millisElapsed) {
     if(change > 1 || change < -1) {
       timesaveState.minutesElapsed += 1;
 
-      if(timesaveState.minutesElapsed >= 10) {
+      if(timesaveState.minutesElapsed >= 5) {
         saveTimeToROM = 1;
         timesaveState.minutesElapsed = 0;
       }
@@ -207,7 +221,15 @@ void setup() {
 
   Serial.println("[+] Creating main timekeeper");
   timekeeperInit(tkTime);
-  restoreTimeFromEEPROM(tkTime);
+
+  Serial.println("[+] Initializing time save/restore mechanism");
+  timesave_io_status_t tsioStatus = fillTimesaveConfig(&tsiocTime, extmemGetAccess(), 0);
+  if(tsioStatus != ETIMESAVE_IO_OK) {
+    Serial.print("[+] timesave: fillTimesaveConfig failed with rc=");
+    Serial.println(tsioStatus);
+  } else {
+    restoreTimeFromEEPROM(tkTime);
+  }
 
   Serial.println("[+] Setting up actions subsystem");
   actionsInit();

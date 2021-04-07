@@ -99,6 +99,7 @@ UTEST_F(EepromHE, Init) {
 
 	ASSERT_EQ(rc, 0);
 	ASSERT_EQ(emheGetPointer(&utest_fixture->descriptor), 0);
+	ASSERT_EQ(utest_fixture->descriptor.flags & EMHE_F_INITIALIZED, 0);
 }
 
 UTEST_F(EepromHE, ReadFirst) {

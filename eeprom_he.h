@@ -8,7 +8,8 @@
 
 typedef enum emhe_flags {
 	EMHE_F_NONE = 0,
-	EMHE_F_RESET = (1 << 0),
+	EMHE_F_INITIALIZED = (1 << 0),
+	EMHE_F_RESET = (1 << 1),
 } emhe_flags_t;
 
 typedef struct emhe_descriptor {

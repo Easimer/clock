@@ -3,15 +3,24 @@
 #include <string.h>
 
 #define MAKE_SIGNATURE(version) (0xC0 | (version & 0xF))
-#define VERSION 0
+#define VERSION 1
 
 #define SIGNATURE MAKE_SIGNATURE(VERSION)
 
-static uint8_t calculateChecksum(uint8_t b0, uint8_t b1, uint8_t b2) {
+typedef struct entry {
+    uint8_t hour;
+    uint8_t minute;
+    uint8_t second;
+    uint8_t checksum;
+} entry_t;
+
+static uint8_t calculateChecksum(void const *buf, uint8_t size) {
     uint16_t sum = 0;
-    sum += b0;
-    sum += b1;
-    sum += b2;
+    uint8_t const *src = (uint8_t const *)buf;
+
+    for (uint8_t i = 0; i < size; i++) {
+        sum += src[i];
+    }
     
     while((sum >> 8) > 0) {
         sum = (sum & 0xFF) + (sum >> 8);
@@ -20,53 +29,93 @@ static uint8_t calculateChecksum(uint8_t b0, uint8_t b1, uint8_t b2) {
     return ~sum;
 }
 
-timesave_io_status_t restoreTime(timekeeper_t *tk, eeprom_access_t *mem) {
-    timesave_io_status_t ret;
-    uint8_t buf[4];
+static timesave_io_status_t initializeMemory(timesave_io_config_t *cfg) {
 
-    // We try eight times
-    for(uint8_t i = 0; i < 8; i++) {
-        mem->read32(mem->user, 0, buf);
+}
 
-        if(buf[0] != SIGNATURE) {
-            ret = ETIMESAVE_IO_BADSIG;
-            continue;
+timesave_io_status_t restoreTime(timekeeper_t *tk, timesave_io_config_t *cfg) {
+    if (tk == NULL || cfg == NULL) {
+        return ETIMESAVE_IO_INVALID_ARG;
+    }
+
+    uint8_t bufSignature = 0;
+    if (cfg->emhe.access->read(cfg->emhe.access->user, cfg->startAddress, &bufSignature) != 0 || bufSignature != SIGNATURE) {
+        return ETIMESAVE_IO_BADSIG;
+    }
+
+    entry_t entry;
+
+    if (emheRead(&cfg->emhe, &entry) != 0) {
+        return ETIMESAVE_IO_READ_FAILURE;
+    }
+
+    uint8_t checksumRead = entry.checksum;
+    entry.checksum = 0;
+    uint8_t checksumCalculated = calculateChecksum(&entry, sizeof(entry));
+
+    if (checksumCalculated != checksumRead) {
+        return ETIMESAVE_IO_BADCHK;
+    }
+
+    timekeeperSet(tk, entry.hour, entry.minute, entry.second);
+
+    return ETIMESAVE_IO_OK;
+}
+
+timesave_io_status_t saveTime(timekeeper_t const *tk, timesave_io_config_t *cfg) {
+    timesave_io_status_t ret = ETIMESAVE_IO_OK;
+    uint8_t bufSignature = 0;
+    entry_t entry;
+
+    if (tk == NULL || cfg == NULL) {
+        return ETIMESAVE_IO_INVALID_ARG;
+    }
+
+    if (cfg->emhe.access->read(cfg->emhe.access->user, cfg->startAddress, &bufSignature) != 0 || bufSignature != SIGNATURE) {
+        // Bad signature, try to reset the data storage
+        if (cfg->emhe.access->write(cfg->emhe.access->user, cfg->startAddress, SIGNATURE) != 0) {
+            return ETIMESAVE_IO_WRITE_FAILURE;
         }
 
-        uint8_t checksumCalculated = calculateChecksum(buf[0], buf[1], buf[2]);
-
-        if(checksumCalculated != buf[3]) {
-            ret = ETIMESAVE_IO_BADCHK;
-            continue;
+        cfg->emhe.flags = EMHE_F_RESET;
+        if (emheInit(&cfg->emhe) != 0) {
+            return ETIMESAVE_IO_WRITE_FAILURE;
         }
 
-        timekeeperSet(tk, buf[1], buf[2]);
-        return ETIMESAVE_IO_OK;
+        ret = ETIMESAVE_IO_ERASED;
+    }
+
+    if (cfg->emhe.access->read(cfg->emhe.access->user, cfg->startAddress, &bufSignature) != 0 || bufSignature != SIGNATURE) {
+        return ETIMESAVE_IO_BADSIG;
+    }
+
+    timekeeperGet(tk, &entry.hour, &entry.minute, &entry.second);
+    entry.checksum = 0;
+    entry.checksum = calculateChecksum(&entry, sizeof(entry));
+
+    if (emheWrite(&cfg->emhe, &entry) != 0) {
+        return ETIMESAVE_IO_WRITE_FAILURE;
     }
 
     return ret;
 }
 
-timesave_io_status_t saveTime(timekeeper_t const *tk, eeprom_access_t *mem) {
-    uint8_t buf[4];
-
-    buf[0] = SIGNATURE;
-    timekeeperGet(tk, &buf[1], &buf[2], NULL);
-    buf[3] = calculateChecksum(SIGNATURE, buf[1], buf[2]);
-
-    for(uint8_t attempt = 0; attempt < 32; attempt++) {
-        mem->write32(mem->user, 0, buf);
-        delay(64);
-
-        uint8_t readbackBuf[4];
-        mem->read32(mem->user, 0, readbackBuf);
-
-        if(memcmp(buf, readbackBuf, 4) == 0) {
-            return ETIMESAVE_IO_OK;
-        }
-
-        delay(64);
+timesave_io_status_t fillTimesaveConfig(timesave_io_config_t *cfg, eeprom_access_t *access, uint16_t startAddress) {
+    if (cfg == NULL || access == NULL) {
+        return ETIMESAVE_IO_INVALID_ARG;
     }
 
-    return ETIMESAVE_IO_WRITE_FAILURE;
+    cfg->startAddress = startAddress;
+    cfg->emhe.access = access;
+    // One extra byte for the signature
+    cfg->emhe.address = startAddress + 1;
+    cfg->emhe.elementCount = 16;
+    cfg->emhe.elementSize = sizeof(entry_t);
+    cfg->emhe.flags = EMHE_F_NONE;
+
+    if (emheInit(&cfg->emhe) != 0) {
+        return ETIMESAVE_IO_INVALID_ARG;
+    }
+
+    return ETIMESAVE_IO_OK;
 }

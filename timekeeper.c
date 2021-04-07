@@ -21,7 +21,12 @@ void timekeeperInit(timekeeper_t *buffer) {
     buffer->millis = 0;
 }
 
-void timekeeperSet(timekeeper_t *tk, uint8_t hour, uint8_t minute) {
+void timekeeperSet(timekeeper_t *tk, uint8_t hour, uint8_t minute, uint8_t second) {
+    while (second > 60) {
+        minute += 1;
+        second -= 60;
+    }
+
     while(minute > 60) {
         hour += 1;
         minute -= 60;
@@ -33,7 +38,7 @@ void timekeeperSet(timekeeper_t *tk, uint8_t hour, uint8_t minute) {
 
     tk->hours = hour;
     tk->minutes = minute;
-    tk->seconds = 0;
+    tk->seconds = second;
     tk->millis = 0;
     tk->flags |= TIMEKEEPER_FLAG_WASSET;
 }
