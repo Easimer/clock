@@ -11,6 +11,7 @@ typedef struct timer_subscriber {
 
 typedef struct timer_state {
     timer_subscriber_t subscribers[TIMER_MAX_SUBSCRIBERS];
+    uint8_t enabled;
 } timer_state_t;
 
 static timer_state_t timerStates[3];
@@ -25,6 +26,11 @@ void timerSetup(timer_id_t id) {
 
 void timerAddTimeElapsed(timer_id_t id, uint16_t millisElapsed) {
     timer_state_t *state = &timerStates[id];
+    
+    if(!state->enabled) {
+        return;
+    }
+
     for(uint8_t slotIdx = 0; slotIdx < TIMER_MAX_SUBSCRIBERS; slotIdx++) {
         timer_subscriber_t *subscriber = &state->subscribers[slotIdx];
         if(subscriber->used) {
@@ -57,4 +63,10 @@ timer_status_t timerSubscribe(timer_id_t id, timer_subscription_t *handle, void 
     return ETIMER_MAX_SUBSCRIBERS;
 }
 
-void timerUnsubscribe(timer_id_t id, timer_subscription_t handle);
+void timerEnable(timer_id_t id) {
+    if (id > TIMER_ID2) {
+        return;
+    }
+
+    timerStates[id].enabled = 1;
+}

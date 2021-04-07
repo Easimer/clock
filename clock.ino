@@ -82,7 +82,7 @@ ISR(TIMER1_COMPA_vect) {
 }
 
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(115200);
 
   l_str_ln("[+] Initializing display");
 
@@ -117,6 +117,8 @@ void setup() {
   coreInit(&coreState);
 
   l_str_ln("[+] Initialization done");
+
+  timerEnable(TIMER_ID1);
 }
 
 void loop() {

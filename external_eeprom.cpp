@@ -61,6 +61,8 @@ static int extMemWriteN(uint16_t address, uint8_t count, uint8_t const *buf) {
 
     Wire.endTransmission();
 
+    delay(count * 32);
+
     return 0;
 }
 

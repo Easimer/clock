@@ -157,15 +157,15 @@ int coreInit(core_state_t *state) {
     restoreTimeFromEEPROM(state, state->tkTime);
   }
 
-   l_str_ln("[+] Setting up actions subsystem");
+  l_str_ln("[+] Setting up actions subsystem");
   actionsInit();
 
-  if((rc = actionsCreateButton(&state->btnSetTime, NULL, &btnCommonDescriptor)) != EACTIONS_OK) {
+  if((rc = actionsCreateButton(&state->btnSetTime, state, &btnCommonDescriptor)) != EACTIONS_OK) {
     l_str("[!] actionsCreateButton failed: ");
     l_num_ln(rc);
   }
 
-  if((rc = actionsCreateButton(&state->btnStopwatch, NULL, &btnCommonDescriptor)) != EACTIONS_OK) {
+  if((rc = actionsCreateButton(&state->btnStopwatch, state, &btnCommonDescriptor)) != EACTIONS_OK) {
     l_str("[!] actionsCreateButton failed: ");
     l_num_ln(rc);
   }

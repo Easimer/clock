@@ -25,7 +25,7 @@ extern "C" {
     void timerSetup(timer_id_t id);
     void timerAddTimeElapsed(timer_id_t id, uint16_t millisElapsed);
     timer_status_t timerSubscribe(timer_id_t id, timer_subscription_t *handle, void *user, timer_callback_t callback);
-    void timerUnsubscribe(timer_id_t id, timer_subscription_t handle);
+    void timerEnable(timer_id_t id);
 #ifdef __cplusplus
 }
 #endif

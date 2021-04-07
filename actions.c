@@ -30,7 +30,7 @@ static void actionsTimerCallback(void *user, uint16_t millisElapsed) {
     for(uint8_t i = 0; i < ACTIONS_MAX_BUTTONS; i++) {
         actions_button_t *button = &buttons[i];
         if(button->used) {
-            INVOKE_CALLBACK_IF_NOT_NULL(button->descriptor, probe, i, user);
+            INVOKE_CALLBACK_IF_NOT_NULL(button->descriptor, probe, i, button->user);
 
             if(button->held) {
                 button->millisHeld += millisElapsed;

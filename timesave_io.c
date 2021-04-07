@@ -1,6 +1,8 @@
-#include "timesave_io.h"
 #include <stddef.h>
 #include <string.h>
+
+#include "timesave_io.h"
+#include "log.h"
 
 #define MAKE_SIGNATURE(version) (0xC0 | (version & 0xF))
 #define VERSION 1
