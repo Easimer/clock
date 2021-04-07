@@ -29,10 +29,6 @@ static uint8_t calculateChecksum(void const *buf, uint8_t size) {
     return ~sum;
 }
 
-static timesave_io_status_t initializeMemory(timesave_io_config_t *cfg) {
-
-}
-
 timesave_io_status_t restoreTime(timekeeper_t *tk, timesave_io_config_t *cfg) {
     if (tk == NULL || cfg == NULL) {
         return ETIMESAVE_IO_INVALID_ARG;
