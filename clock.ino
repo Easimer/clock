@@ -237,3 +237,4 @@ void loop() {
 #include "display.c"
 #include "timekeeper.c"
 #include "actions.c"
+#include "eeprom_he.c"
