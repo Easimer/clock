@@ -16,6 +16,13 @@ typedef struct timekeeper timekeeper_t;
     uint8_t tkbuf_##name[TIMEKEEPER_BUFFER_SIZE]; \
     timekeeper_t *name = (timekeeper_t*)tkbuf_##name;
 
+#define TIMEKEEPER_DECLARE_BUFFER_IN(name) \
+    uint8_t tkbuf_##name[TIMEKEEPER_BUFFER_SIZE]; \
+    timekeeper_t *name
+
+#define TIMEKEEPER_SETUP_BUFFER_IN(container, name) \
+    container->name = (timekeeper_t*)state->tkbuf_##name;
+
 /*
  * Creates a new timekeeper in-place at the supplied pointer.
  * The space allocated at the pointer must be at least

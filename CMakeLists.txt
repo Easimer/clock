@@ -9,6 +9,8 @@ set(C_EXTENSIONS OFF)
 set(SRC_CORE
   actions.c
   actions.h
+  core.c
+  core.h
   display.c
   display.h
   config.h

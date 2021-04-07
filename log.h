@@ -17,4 +17,10 @@ void logPrintNumber(uint16_t);
 }
 #endif
 
+#define l_str_ln(s) logPrintLnString(s)
+#define l_str(s) logPrintString(s)
+
+#define l_num_ln(s) logPrintLnNumber(s)
+#define l_num(s) logPrintNumber(s)
+
 #endif
