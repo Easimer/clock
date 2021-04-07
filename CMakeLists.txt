@@ -24,10 +24,11 @@ set(SRC_CORE
 )
 
 set(SRC_TESTS
-  eeprom_he.tests.c
+  tests/eeprom_he.tests.c
 )
 
 add_library(clock_core ${SRC_CORE})
+target_include_directories(clock_core PUBLIC .)
 
 add_executable(clock_tests ${SRC_TESTS})
 target_link_libraries(clock_tests PRIVATE clock_core )
