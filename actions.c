@@ -108,4 +108,6 @@ actions_status_t actionsSetButtonState(actions_button_handle_t handle, uint8_t i
     }
 
     btn->held = (isHeld != 0) ? 1 : 0;
+
+    return EACTIONS_OK;
 }

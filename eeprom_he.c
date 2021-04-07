@@ -1,4 +1,6 @@
 #include "eeprom_he.h"
+#include <stdint.h>
+#include <stddef.h>
 
 static uint16_t getStatusBufferAddress(emhe_descriptor_t const *D, uint8_t idx) {
 	return D->address + idx;
