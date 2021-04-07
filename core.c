@@ -10,6 +10,8 @@ static void longPress(actions_button_handle_t handle, void *user);
 static void saveTimeToEEPROM(core_state_t *state, timekeeper_t const *tk);
 static void restoreTimeFromEEPROM(core_state_t *state, timekeeper_t *tk);
 
+static void displayDigits(void *user, uint16_t millis_elapsed);
+static void accumulateTime(void *user, uint16_t millisElapsed);
 static void decomposeDigits(uint8_t num, uint8_t *dh, uint8_t *dl);
 
 static actions_button_descriptor_t btnCommonDescriptor = {

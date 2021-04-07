@@ -23,6 +23,10 @@ typedef struct timekeeper timekeeper_t;
 #define TIMEKEEPER_SETUP_BUFFER_IN(container, name) \
     container->name = (timekeeper_t*)state->tkbuf_##name;
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /*
  * Creates a new timekeeper in-place at the supplied pointer.
  * The space allocated at the pointer must be at least
@@ -75,5 +79,9 @@ void timekeeperGet(timekeeper_t const *tk, uint8_t *hours, uint8_t *minutes, uin
  * - 3 if the `hours` counter has changed as well.
  */
 int timekeeperAccumulate(timekeeper_t *tk, uint16_t milliseconds);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* CLOCK_TIMEKEEPER_H */

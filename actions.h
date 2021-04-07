@@ -29,9 +29,17 @@ typedef struct actions_button_descriptor {
     actions_button_double_clicked_t doubleClick;
 } actions_button_descriptor_t;
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void actionsInit();
 actions_status_t actionsCreateButton(actions_button_handle_t *handle, void *user, actions_button_descriptor_t *descriptor);
 actions_status_t actionsDestroyButton(actions_button_handle_t handle);
 actions_status_t actionsSetButtonState(actions_button_handle_t handle, uint8_t isHeld);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* CLOCK_ACTIONS_H */

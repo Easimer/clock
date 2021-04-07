@@ -24,9 +24,17 @@ typedef struct emhe_descriptor {
 
 #define EMHE_GET_BUFFER_SIZE_REQUIRED(elementSize, elementCount) ((elementSize) * (elementCount) + (elementCount) * sizeof(uint8_t))
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 int emheInit(emhe_descriptor_t *descriptor);
 int emheRead(emhe_descriptor_t *descriptor, void *buffer);
 int emheWrite(emhe_descriptor_t *descriptor, void const *buffer);
 uint8_t emheGetPointer(emhe_descriptor_t const *descriptor);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* CLOCK_EEPROM_HE_H */

@@ -82,7 +82,6 @@ ISR(TIMER1_COMPA_vect) {
 }
 
 void setup() {
-  uint8_t rc;
   Serial.begin(9600);
 
   l_str_ln("[+] Initializing display");
@@ -123,8 +122,3 @@ void setup() {
 void loop() {
   coreLoop(&coreState);
 }
-
-#include "display.c"
-#include "timekeeper.c"
-#include "actions.c"
-#include "eeprom_he.c"

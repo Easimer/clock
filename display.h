@@ -28,6 +28,14 @@ typedef struct display_ctl {
   uint8_t seq;
 } display_ctl_t;
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void displayDigitsDec(display_ctl_t *ctl, uint8_t d0, uint8_t d1, uint8_t d2, uint8_t d3);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* CLOCK_DISPLAY_H */
