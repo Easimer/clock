@@ -1,5 +1,4 @@
 #include "config.h"
-#include <Arduino.h>
 #include "core.h"
 #include "log.h"
 
