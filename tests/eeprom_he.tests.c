@@ -99,7 +99,7 @@ UTEST_F(EepromHE, Init) {
 
 	ASSERT_EQ(rc, 0);
 	ASSERT_EQ(emheGetPointer(&utest_fixture->descriptor), 0);
-	ASSERT_EQ(utest_fixture->descriptor.flags & EMHE_F_INITIALIZED, 0);
+	ASSERT_EQ(utest_fixture->descriptor.flags & EMHE_F_INITIALIZED, EMHE_F_INITIALIZED);
 }
 
 UTEST_F(EepromHE, ReadFirst) {
@@ -222,4 +222,29 @@ UTEST_F(EepromHE, WriteWrapping) {
 	ASSERT_EQ(utest_fixture->buffers.status[0], 16);
 	ASSERT_EQ(emheGetPointer(&utest_fixture->descriptor), 0);
 	ASSERT_EQ(utest_fixture->buffers.parameter[0], expected);
+}
+
+UTEST_F(EepromHE, Sequence) {
+	int rc;
+	uint32_t rd;
+
+	memset(&utest_fixture->buffers, 0, sizeof(utest_fixture->buffers));
+
+	for (uint32_t i = 0; i < 255; i++) {
+		utest_fixture->descriptor.flags = EMHE_F_NONE;
+		rc = emheInit(&utest_fixture->descriptor);
+		ASSERT_EQ(rc, 0);
+
+		rc = emheWrite(&utest_fixture->descriptor, &i);
+		ASSERT_EQ(rc, 0);
+		uint8_t ptr = emheGetPointer(&utest_fixture->descriptor);
+		
+		utest_fixture->descriptor.flags = EMHE_F_NONE;
+		rc = emheInit(&utest_fixture->descriptor);
+		ASSERT_EQ(rc, 0);
+		ASSERT_EQ(emheGetPointer(&utest_fixture->descriptor), ptr);
+
+		rc = emheRead(&utest_fixture->descriptor, &rd);
+		ASSERT_EQ(rd, i);
+	}
 }

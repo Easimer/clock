@@ -30,7 +30,7 @@ static int findAddress(emhe_descriptor_t const *D, uint8_t *outAddr) {
 		if (rc != 0) { return rc; }
 	} while (next == cur + 1);
 
-	*outAddr = cur;
+	*outAddr = addr - getStatusBufferAddress(D, 0) - 1;
 	
 	return 0;
 }
