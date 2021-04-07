@@ -58,8 +58,9 @@ static void probeButton(actions_button_handle_t handle, void *user);
 static void clickButton(actions_button_handle_t handle, void *user);
 static void longPress(actions_button_handle_t handle, void *user);
 
+static actions_button_handle_t btnStopwatch;
 static actions_button_handle_t btnIncreaseMinutes;
-static actions_button_descriptor_t btnIncreaseMinutesDescriptor = {
+static actions_button_descriptor_t btnCommonDescriptor = {
   .probe = probeButton,
   .pressed = NULL,
   .released = NULL,
@@ -69,7 +70,15 @@ static actions_button_descriptor_t btnIncreaseMinutesDescriptor = {
 };
 
 static void probeButton(actions_button_handle_t handle, void *user) {
-  actionsSetButtonState(btnIncreaseMinutes, (digitalRead(PIN_BUTTON_3) == HIGH) ? 1 : 0);
+  uint8_t state = 0;
+
+  if(handle == btnStopwatch) {
+    state = (digitalRead(PIN_BUTTON_2) == LOW) ? 1 : 0;
+  } else if(handle == btnIncreaseMinutes) {
+    state = (digitalRead(PIN_BUTTON_3) == LOW) ? 1 : 0;
+  }
+
+  actionsSetButtonState(handle, state);
 }
 
 static void clickButton(actions_button_handle_t handle, void *user) {
@@ -204,11 +213,16 @@ void setup() {
     digitalWrite(displayPins.segment[i], LOW);
   }
 
+  displayDigitsDec(&displayCtl, 8, 0, 0, 0);
+
   Serial.println("[+] Initializing EEPROM");
   extmemInit();
 
   Serial.println("[+] Initializing buttons");
-  pinMode(PIN_BUTTON_3, INPUT);
+  pinMode(PIN_BUTTON_0, INPUT_PULLUP);
+  pinMode(PIN_BUTTON_1, INPUT_PULLUP);
+  pinMode(PIN_BUTTON_2, INPUT_PULLUP);
+  pinMode(PIN_BUTTON_3, INPUT_PULLUP);
 
   digits[0] = digits[1] = digits[2] = digits[3] = 0;
 
@@ -233,7 +247,13 @@ void setup() {
 
   Serial.println("[+] Setting up actions subsystem");
   actionsInit();
-  if((rc = actionsCreateButton(&btnIncreaseMinutes, NULL, &btnIncreaseMinutesDescriptor)) != EACTIONS_OK) {
+  
+  if((rc = actionsCreateButton(&btnIncreaseMinutes, NULL, &btnCommonDescriptor)) != EACTIONS_OK) {
+    Serial.print("actionsCreateButton failed: ");
+    Serial.println(rc);
+  }
+
+  if((rc = actionsCreateButton(&btnStopwatch, NULL, &btnCommonDescriptor)) != EACTIONS_OK) {
     Serial.print("actionsCreateButton failed: ");
     Serial.println(rc);
   }
