@@ -1,16 +1,12 @@
+#include "config.h"
 #include "actions.h"
 #include "interrupts.h"
 #include <string.h>
-
-#define ACTIONS_MAX_BUTTONS (4)
 
 #define INVOKE_CALLBACK_IF_NOT_NULL(descriptor, name, handle, user) \
     if(descriptor->name != NULL) { \
         descriptor->name(handle, user); \
     }
-
-#define ACTIONS_DOUBLE_CLICK_MAX_MILLISECONDS_SINCE_LAST_RELEASE (250)
-#define ACTIONS_LONG_PRESS_MIN_MILLISECONDS (250)
 
 typedef struct actions_button {
     uint8_t used : 1;
