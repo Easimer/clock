@@ -37,6 +37,7 @@ void actionsInit();
 actions_status_t actionsCreateButton(actions_button_handle_t *handle, void *user, actions_button_descriptor_t *descriptor);
 actions_status_t actionsDestroyButton(actions_button_handle_t handle);
 actions_status_t actionsSetButtonState(actions_button_handle_t handle, uint8_t isHeld);
+actions_status_t actionsTimeElapsed(uint8_t millisElapsed);
 
 #ifdef __cplusplus
 }

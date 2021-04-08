@@ -23,18 +23,7 @@ static actions_button_t buttons[ACTIONS_MAX_BUTTONS];
 static timer_subscription_t timerSub;
 
 static void actionsTimerCallback(void *user, uint16_t millisElapsed) {
-    for(uint8_t i = 0; i < ACTIONS_MAX_BUTTONS; i++) {
-        actions_button_t *button = &buttons[i];
-        if(button->used) {
-            INVOKE_CALLBACK_IF_NOT_NULL(button->descriptor, probe, i, button->user);
-
-            if(button->held) {
-                button->millisHeld += millisElapsed;
-            } else {
-                button->millisLastRelease += millisElapsed;
-            }
-        }
-    }
+    actionsTimeElapsed(millisElapsed);
 }
 
 void actionsInit() {
@@ -106,4 +95,19 @@ actions_status_t actionsSetButtonState(actions_button_handle_t handle, uint8_t i
     btn->held = (isHeld != 0) ? 1 : 0;
 
     return EACTIONS_OK;
+}
+
+actions_status_t actionsTimeElapsed(uint8_t millisElapsed) {
+    for (uint8_t i = 0; i < ACTIONS_MAX_BUTTONS; i++) {
+        actions_button_t *button = &buttons[i];
+        if (button->used) {
+            INVOKE_CALLBACK_IF_NOT_NULL(button->descriptor, probe, i, button->user);
+
+            if (button->held) {
+                button->millisHeld += millisElapsed;
+            } else {
+                button->millisLastRelease += millisElapsed;
+            }
+        }
+    }
 }
