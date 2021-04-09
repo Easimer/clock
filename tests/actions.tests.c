@@ -38,6 +38,7 @@ UTEST_F_SETUP(Actions) {
     utest_fixture->longPress = 0;
     utest_fixture->doubleClick = 0;
 
+    actionsInit();
     rc = actionsCreateButton(&utest_fixture->button, utest_fixture, &testDescriptor);
     ASSERT_EQ(rc, EACTIONS_OK);
 }
