@@ -26,6 +26,7 @@ set(SRC_CORE
 )
 
 set(SRC_TESTS
+  tests/actions.tests.c
   tests/eeprom_he.tests.c
 )
 
