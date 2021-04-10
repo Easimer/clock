@@ -14,6 +14,9 @@ static void displayDigits(void *user, uint16_t millis_elapsed);
 static void accumulateTime(void *user, uint16_t millisElapsed);
 static void decomposeDigits(uint8_t num, uint8_t *dh, uint8_t *dl);
 
+static display_hardware_status_t displayShowTime(void *user, uint8_t hour, uint8_t minute, uint8_t second);
+static display_hardware_status_t displayShowIcon(void *user, display_icon_t icon);
+
 static actions_button_descriptor_t btnCommonDescriptor = {
     .probe = probeButton,
     .pressed = NULL,
@@ -110,7 +113,7 @@ static void restoreTimeFromEEPROM(core_state_t *state, timekeeper_t *tk) {
 
 static void displayDigits(void *user, uint16_t millis_elapsed) {
     core_state_t *state = (core_state_t *)user;
-    d7segDisplayDec(state->displayCtl, state->digits[0], state->digits[1], state->digits[2], state->digits[3]);
+    displayUpdateTime(&state->display, EDISPVIEW_CLOCK, state->tkTime);
 }
 
 static void accumulateTime(void *user, uint16_t millisElapsed) {
@@ -119,9 +122,6 @@ static void accumulateTime(void *user, uint16_t millisElapsed) {
     if ((change = timekeeperAccumulate(state->tkTime, millisElapsed)) != 0) {
         uint8_t hours, minutes, seconds;
         timekeeperGet(state->tkTime, &hours, &minutes, &seconds);
-
-        decomposeDigits(hours, &state->digits[0], &state->digits[1]);
-        decomposeDigits(minutes, &state->digits[2], &state->digits[3]);
 
         if (change > 1 || change < -1) {
             state->minutesElapsedSinceLastTimeSave += 1;
@@ -139,13 +139,41 @@ static void decomposeDigits(uint8_t num, uint8_t *dh, uint8_t *dl) {
     *dl = num % 10;
 }
 
+static display_hardware_status_t displayShowTime(void *user, uint8_t hour, uint8_t minute, uint8_t second) {
+    core_state_t *state = (core_state_t *)user;
+    display_view_t currentView = EDISPVIEW_CLOCK;
+    uint8_t d0, d1, d2, d3;
+
+    displayGetCurrentView(&state->display, &currentView);
+
+    if (currentView == EDISPVIEW_CLOCK) {
+        decomposeDigits(hour, &d0, &d1);
+        decomposeDigits(minute, &d2, &d3);
+    } else {
+        if (hour == 0) {
+            decomposeDigits(minute, &d0, &d1);
+            decomposeDigits(second, &d2, &d3);
+        } else {
+            decomposeDigits(hour, &d0, &d1);
+            decomposeDigits(minute, &d2, &d3);
+        }
+    }
+    
+    d7segDisplayDec(state->displayCtl, d0, d1, d2, d3);
+
+    return EDISPHW_OK;
+}
+
+static display_hardware_status_t displayShowIcon(void *user, display_icon_t icon) {
+    return EDISPHW_UNSUPPORTED;
+}
+
 int coreInit(core_state_t *state) {
     int rc;
 
     TIMEKEEPER_SETUP_BUFFER_IN(state, tkTime);
     state->saveTimeToROM = 0;
     state->minutesElapsedSinceLastTimeSave = 0;
-    memset(state->digits, 0, sizeof(state->digits));
 
     timerSetup(TIMER_ID1);
 
@@ -175,6 +203,16 @@ int coreInit(core_state_t *state) {
         l_num_ln(rc);
     }
 
+    l_str_ln("[+] Initializing display subsystem");
+    state->display.hw = &state->displayHw;
+    state->display.user = state;
+    state->displayHw.showIcon = displayShowIcon;
+    state->displayHw.showTime = displayShowTime;
+    if ((rc = displayInit(&state->display)) != EDISP_OK) {
+        l_str("[!] displayInit failed: ");
+        l_num_ln(rc);
+    }
+
     timerSubscribe(TIMER_ID1, &state->subscriptionDisplayDigits, state, displayDigits);
     timerSubscribe(TIMER_ID1, &state->subscriptionAccumulateTime, state, accumulateTime);
 
@@ -194,3 +232,4 @@ int coreElapsed(core_state_t *state, uint8_t millisElapsed) {
     timerAddTimeElapsed(TIMER_ID1, 1);
     return 0;
 }
+

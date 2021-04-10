@@ -5,6 +5,7 @@
 
 #include "actions.h"
 #include "7seg.h"
+#include "display.h"
 #include "interrupts.h"
 #include "timekeeper.h"
 #include "timesave_io.h"
@@ -31,8 +32,10 @@ typedef struct core_state {
     timer_subscription_t subscriptionDisplayDigits;
     timer_subscription_t subscriptionAccumulateTime;
 
-    uint8_t digits[4];
     uint8_t minutesElapsedSinceLastTimeSave;
+
+    display_state_t display;
+    display_hardware_t displayHw;
 } core_state_t;
 
 #ifdef __cplusplus
