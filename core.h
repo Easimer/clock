@@ -6,7 +6,7 @@
 #include "actions.h"
 #include "7seg.h"
 #include "display.h"
-#include "interrupts.h"
+#include "timer.h"
 #include "timekeeper.h"
 #include "timesave_io.h"
 

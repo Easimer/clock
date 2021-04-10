@@ -20,10 +20,10 @@ set(SRC_CORE
   eeprom_access.h
   eeprom_he.c
   eeprom_he.h
-  interrupts.c
-  interrupts.h
   timekeeper.c
   timekeeper.h
+  timer.c
+  timer.h
   timesave_io.c
   timesave_io.h
 )

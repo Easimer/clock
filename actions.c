@@ -1,6 +1,6 @@
 #include "config.h"
 #include "actions.h"
-#include "interrupts.h"
+#include "timer.h"
 #include <string.h>
 
 #define INVOKE_CALLBACK_IF_NOT_NULL(descriptor, name, handle, user) \

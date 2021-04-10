@@ -1,5 +1,5 @@
 #include <string.h>
-#include "interrupts.h"
+#include "timer.h"
 
 #define TIMER_MAX_SUBSCRIBERS (4)
 
