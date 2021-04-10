@@ -4,7 +4,7 @@
 #include <stdint.h>
 
 #include "actions.h"
-#include "display.h"
+#include "7seg.h"
 #include "interrupts.h"
 #include "timekeeper.h"
 #include "timesave_io.h"

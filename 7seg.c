@@ -1,6 +1,6 @@
 #include <stddef.h>
 #include <stdint.h>
-#include "display.h"
+#include "7seg.h"
 
 // DP, G, F, E, D, C, B, A
 static uint8_t digitSegmentBits[16] = {

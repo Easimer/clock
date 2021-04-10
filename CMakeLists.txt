@@ -11,8 +11,8 @@ set(SRC_CORE
   actions.h
   core.c
   core.h
-  display.c
-  display.h
+  7seg.c
+  7seg.h
   config.h
   eeprom_access.h
   eeprom_he.c
