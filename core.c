@@ -72,6 +72,8 @@ static void saveTimeToEEPROM(core_state_t *state, timekeeper_t const *tk) {
         case ETIMESAVE_IO_WRITE_FAILURE:
             l_str_ln("[-] timesave: couldn't save time: write failure");
             break;
+        default:
+            break;
     }
 }
 
@@ -100,6 +102,8 @@ static void restoreTimeFromEEPROM(core_state_t *state, timekeeper_t *tk) {
             break;
         case ETIMESAVE_IO_ERASED:
             l_str_ln("[+] Time wasn't restored: first initialization");
+            break;
+        default:
             break;
     }
 }

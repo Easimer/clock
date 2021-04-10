@@ -17,7 +17,7 @@ typedef struct actions_button {
     uint16_t millisLastRelease;
 
     void *user;
-    actions_button_descriptor_t *descriptor;
+    actions_button_descriptor_t const *descriptor;
 } actions_button_t;
 
 static actions_button_t buttons[ACTIONS_MAX_BUTTONS];
@@ -27,12 +27,12 @@ static void actionsTimerCallback(void *user, uint16_t millisElapsed) {
     actionsTimeElapsed(millisElapsed);
 }
 
-void actionsInit() {
+void actionsInit(void) {
     memset(buttons, 0, sizeof(buttons));
     timerSubscribe(TIMER_ID1, &timerSub, NULL, actionsTimerCallback);
 }
 
-actions_status_t actionsCreateButton(actions_button_handle_t *handle, void *user, actions_button_descriptor_t *descriptor) {
+actions_status_t actionsCreateButton(actions_button_handle_t *handle, void *user, actions_button_descriptor_t const *descriptor) {
     if(handle == NULL || descriptor == NULL) {
         return EACTIONS_INVALID;
     }
