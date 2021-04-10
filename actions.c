@@ -101,7 +101,7 @@ actions_status_t actionsSetButtonState(actions_button_handle_t handle, uint8_t i
     return EACTIONS_OK;
 }
 
-actions_status_t actionsTimeElapsed(uint8_t millisElapsed) {
+actions_status_t actionsTimeElapsed(uint16_t millisElapsed) {
     for (uint8_t handle = 0; handle < ACTIONS_MAX_BUTTONS; handle++) {
         actions_button_t *button = &buttons[handle];
         if (button->used) {
