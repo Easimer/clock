@@ -15,7 +15,7 @@ typedef struct core_state {
     // ------------------------------------
     // Set by hardware layer
     // ------------------------------------
-    display_ctl_t *displayCtl;
+    d7seg_ctl_t *displayCtl;
     core_button_probe_t buttonProbe;
     eeprom_access_t *externalMemory;
 

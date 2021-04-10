@@ -7,13 +7,14 @@ set(C_STANDARD_REQUIRED ON)
 set(C_EXTENSIONS OFF)
 
 set(SRC_CORE
+  config.h
+
+  7seg.c
+  7seg.h
   actions.c
   actions.h
   core.c
   core.h
-  7seg.c
-  7seg.h
-  config.h
   eeprom_access.h
   eeprom_he.c
   eeprom_he.h

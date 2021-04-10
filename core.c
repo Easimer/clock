@@ -110,7 +110,7 @@ static void restoreTimeFromEEPROM(core_state_t *state, timekeeper_t *tk) {
 
 static void displayDigits(void *user, uint16_t millis_elapsed) {
     core_state_t *state = (core_state_t *)user;
-    displayDigitsDec(state->displayCtl, state->digits[0], state->digits[1], state->digits[2], state->digits[3]);
+    d7segDisplayDec(state->displayCtl, state->digits[0], state->digits[1], state->digits[2], state->digits[3]);
 }
 
 static void accumulateTime(void *user, uint16_t millisElapsed) {

@@ -35,7 +35,7 @@ static void display_segment_cb(void *context, uint8_t segment, uint8_t state) {
   digitalWrite(pins->segment[segment], state != 0 ? HIGH : LOW);
 }
 
-static display_ctl_t displayCtl = {
+static d7seg_ctl_t displayCtl = {
   .context = &displayPins,
   .select = display_select_cb,
   .segment = display_segment_cb,
@@ -95,7 +95,7 @@ void setup() {
     digitalWrite(displayPins.segment[i], LOW);
   }
 
-  displayDigitsDec(&displayCtl, 8, 0, 0, 0);
+  d7segDisplayDec(&displayCtl, 8, 0, 0, 0);
 
   l_str_ln("[+] Initializing EEPROM");
   extmemInit();
