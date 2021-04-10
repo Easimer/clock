@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <stddef.h>
 #include "timekeeper.h"
 
 // Time was set using timekeeperSet
