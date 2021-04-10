@@ -34,14 +34,20 @@ UTEST_F(Display, InitialState) {
     rc = displayInit(&utest_fixture->disp);
     ASSERT_EQ(rc, EDISP_OK);
 
-    ASSERT_EQ(utest_fixture->disp.currentView, EDISPVIEW_CLOCK);
+    display_view_t currentView;
+    rc = displayGetCurrentView(&utest_fixture->disp, &currentView);
+    ASSERT_EQ(rc, EDISP_OK);
+    ASSERT_EQ(currentView, EDISPVIEW_CLOCK);
 }
 
 UTEST_F(Display, ViewSwitch) {
     display_status_t rc;
+    display_view_t currentView;
     rc = displaySwitchView(&utest_fixture->disp, EDISPVIEW_STOPWATCH);
     ASSERT_EQ(rc, EDISP_OK);
-    ASSERT_EQ(utest_fixture->disp.currentView, EDISPVIEW_STOPWATCH);
+    rc = displayGetCurrentView(&utest_fixture->disp, &currentView);
+    ASSERT_EQ(rc, EDISP_OK);
+    ASSERT_EQ(currentView, EDISPVIEW_STOPWATCH);
     ASSERT_EQ(utest_fixture->icon, EDISPICON_STOPWATCH);
 }
 

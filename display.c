@@ -56,3 +56,13 @@ display_status_t displaySwitchView(display_state_t *display, display_view_t view
 
     return EDISP_OK;
 }
+
+display_status_t displayGetCurrentView(display_state_t *display, display_view_t *view) {
+    if (display == NULL || view == NULL) {
+        return EDISP_INVALID_ARG;
+    }
+
+    *view = display->currentView;
+
+    return EDISP_OK;
+}

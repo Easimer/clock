@@ -52,6 +52,7 @@ extern "C" {
 #endif
 
 display_status_t displayInit(display_state_t *display);
+display_status_t displayGetCurrentView(display_state_t *display, display_view_t *view);
 display_status_t displayUpdateTime(display_state_t *display, display_view_t view, timekeeper_t *tk);
 display_status_t displaySwitchView(display_state_t *display, display_view_t view);
 
