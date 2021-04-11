@@ -20,59 +20,33 @@ struct EepromHE {
     emhe_descriptor_t descriptor;
 };
 
-static int eeprom_read(void *user, uint16_t address, uint8_t *value) {
+static int eeprom_read(void *user, uint16_t address, uint8_t count, uint8_t nmemb, uint8_t *value) {
     struct EepromHE *state = (struct EepromHE *)user;
 
-    if (address >= sizeof(state->buffers)) {
+    unsigned total = count * nmemb;
+
+    if (address + total > sizeof(state->buffers)) {
         return 1;
     }
 
-    value[0] = state->raw[address];
-
-    return 0;
-}
-
-static int eeprom_write(void *user, uint16_t address, uint8_t value) {
-    struct EepromHE *state = (struct EepromHE *)user;
-
-    if (address >= sizeof(state->buffers)) {
-        return 1;
-    }
-
-    state->raw[address] = value;
-
-    return 0;
-}
-
-static int eeprom_read32(void *user, uint16_t address, uint8_t *value) {
-    struct EepromHE *state = (struct EepromHE *)user;
-
-    if (address + 3 >= sizeof(state->buffers)) {
-        return 1;
-    }
-
-    for (uint8_t i = 0; i < 4; i++) {
-        uint16_t srcAddr = address + i;
-        if(srcAddr >= address) { // guard against overflow
-            value[i] = state->raw[srcAddr];
-        }
+    for (unsigned i = 0; i < total; i++) {
+        value[i] = state->raw[address + i];
     }
 
     return 0;
 }
 
-static int eeprom_write32(void *user, uint16_t address, uint8_t const *value) {
+static int eeprom_write(void *user, uint16_t address, uint8_t count, uint8_t nmemb, uint8_t const *value) {
     struct EepromHE *state = (struct EepromHE *)user;
 
-    if (address + 3 >= sizeof(state->buffers)) {
+    unsigned total = count * nmemb;
+
+    if (address + total > sizeof(state->buffers)) {
         return 1;
     }
 
-    for (uint8_t i = 0; i < 4; i++) {
-        uint16_t dstAddr = address + i;
-        if(dstAddr >= address) { // guard against overflow
-            state->raw[dstAddr] = value[i];
-        }
+    for (unsigned i = 0; i < total; i++) {
+        state->raw[address + i] = value[i];
     }
 
     return 0;
@@ -82,8 +56,6 @@ UTEST_F_SETUP(EepromHE) {
     utest_fixture->access.user = utest_fixture;
     utest_fixture->access.read = eeprom_read;
     utest_fixture->access.write = eeprom_write;
-    utest_fixture->access.read32 = eeprom_read32;
-    utest_fixture->access.write32 = eeprom_write32;
 
     utest_fixture->descriptor.access = &utest_fixture->access;
     utest_fixture->descriptor.address = 0;
