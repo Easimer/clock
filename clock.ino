@@ -76,6 +76,22 @@ static void setupTimer1Interrupts() {
   TIMSK1 |= (1 << OCIE1A);
 }
 
+void logPrintLnString(char const *s) {
+    Serial.println(s);
+}
+
+void logPrintString(char const *s) {
+    Serial.print(s);
+}
+
+void logPrintLnNumber(uint16_t n) {
+    Serial.println(n);
+}
+
+void logPrintNumber(uint16_t n) {
+    Serial.print(n);
+}
+
 ISR(TIMER1_COMPA_vect) {
     coreElapsed(&coreState, 1);
 }
