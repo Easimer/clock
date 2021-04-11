@@ -13,6 +13,10 @@ display_status_t displayInit(display_state_t *display) {
         return EDISP_INVALID_ARG;
     }
 
+    if(display->hw == NULL) {
+        return EDISP_INVALID_ARG;
+    }
+
     display->currentView = EDISPVIEW_CLOCK;
     for (uint8_t i = 0; i < EDISPVIEW_MAX; i++) {
         display->viewState[i].hour = 0;
@@ -25,6 +29,10 @@ display_status_t displayInit(display_state_t *display) {
 
 display_status_t displayUpdateTime(display_state_t *display, display_view_t view, timekeeper_t *tk) {
     if (display == NULL || tk == NULL) {
+        return EDISP_INVALID_ARG;
+    }
+
+    if(display->hw == NULL) {
         return EDISP_INVALID_ARG;
     }
 
@@ -43,6 +51,10 @@ display_status_t displayUpdateTime(display_state_t *display, display_view_t view
 
 display_status_t displaySwitchView(display_state_t *display, display_view_t view) {
     if (display == NULL || view < 0 || view >= EDISPVIEW_MAX) {
+        return EDISP_INVALID_ARG;
+    }
+
+    if(display->hw == NULL) {
         return EDISP_INVALID_ARG;
     }
 
