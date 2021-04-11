@@ -1,7 +1,6 @@
 #include <string.h>
+#include "config.h"
 #include "timer.h"
-
-#define TIMER_MAX_SUBSCRIBERS (4)
 
 typedef struct timer_subscriber {
     uint8_t used;

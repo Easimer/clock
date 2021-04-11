@@ -37,6 +37,7 @@ set(SRC_TESTS
   tests/display.tests.c
   tests/eeprom_he.tests.c
   tests/timekeeper.tests.c
+  tests/timer.tests.c
 )
 
 add_library(clock_core ${SRC_CORE})

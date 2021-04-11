@@ -31,4 +31,6 @@
 
 #define TIMESAVE_INTERVAL_MINUTES (10)
 
+#define TIMER_MAX_SUBSCRIBERS (4)
+
 #endif /* CLOCK_CONFIG_H */
