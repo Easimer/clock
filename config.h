@@ -1,6 +1,10 @@
 #ifndef CLOCK_CONFIG_H
 #define CLOCK_CONFIG_H
 
+#define DISPLAY_USE_7SEG (1)
+
+#if DISPLAY_USE_7SEG
+
 #define PIN_DISPLAY_DIGIT0 (10)
 #define PIN_DISPLAY_DIGIT1 (11)
 #define PIN_DISPLAY_DIGIT2 (12)
@@ -13,6 +17,8 @@
 #define PIN_DISPLAY_SEGMENT_E (26)
 #define PIN_DISPLAY_SEGMENT_F (27)
 #define PIN_DISPLAY_SEGMENT_G (28)
+
+#endif /* DISPLAY_USE_7SEG */
 
 #define PIN_BUTTON_0 (30)
 #define PIN_BUTTON_1 (31)

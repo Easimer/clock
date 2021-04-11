@@ -1,6 +1,8 @@
 #include "display.h"
 #include "display_7seg.h"
 
+#if DISPLAY_USE_7SEG
+
 static void decomposeDigits(uint8_t num, uint8_t *dh, uint8_t *dl) {
     *dh = num / 10;
     *dl = num % 10;
@@ -40,3 +42,5 @@ void d7segInitDescriptor(display_7seg_t *d, d7seg_ctl_t *hwCtl) {
     d->display.showTime = displayShowTime;
     d->display.showIcon = displayShowIcon;
 }
+
+#endif /* DISPLAY_USE_7SEG */

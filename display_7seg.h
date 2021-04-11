@@ -5,6 +5,7 @@
  * Display abstraction layer for 4 digit 7-segment displays
  */
 
+#include "config.h"
 #include "display.h"
 #include "7seg.h"
 
