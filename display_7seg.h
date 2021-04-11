@@ -10,6 +10,7 @@
 #include "7seg.h"
 
 typedef struct display_7seg {
+    display_state_t state;
     d7seg_ctl_t *hwCtl;
     display_hardware_t display;
 } display_7seg_t;

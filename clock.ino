@@ -46,7 +46,13 @@ static d7seg_ctl_t display7SegCtl = {
   .seq = 0,
 };
 
-static display_7seg_t display;
+static display_7seg_t display = {
+  .state = {
+    .hw = &display.display,
+    .user = &display,
+  },
+  .hwCtl = &display7SegCtl,
+};
 
 #endif /* DISPLAY_USE_7SEG */
 
@@ -61,9 +67,7 @@ static uint8_t buttonProbe(uint8_t idx) {
 }
 
 static core_state_t coreState = {
-  .displayHw = &display.display,
-  .displayHwUser = &display,
-
+  .display = &display.state,
   .buttonProbe = buttonProbe,
   .externalMemory = NULL,
 };

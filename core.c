@@ -113,7 +113,7 @@ static void restoreTimeFromEEPROM(core_state_t *state, timekeeper_t *tk) {
 
 static void displayDigits(void *user, uint16_t millis_elapsed) {
     core_state_t *state = (core_state_t *)user;
-    displayUpdateTime(&state->display, EDISPVIEW_CLOCK, state->tkTime);
+    displayUpdateTime(state->display, EDISPVIEW_CLOCK, state->tkTime);
 }
 
 static void accumulateTime(void *user, uint16_t millisElapsed) {
@@ -167,9 +167,7 @@ int coreInit(core_state_t *state) {
     }
 
     kprintf(LOG_SUCCESS "Initializing display subsystem\n");
-    state->display.hw = state->displayHw;
-    state->display.user = state->displayHwUser;
-    if ((rc = displayInit(&state->display)) != EDISP_OK) {
+    if ((rc = displayInit(state->display)) != EDISP_OK) {
         kprintf(LOG_ERROR "displayInit failed: %b\n", rc);
     }
 

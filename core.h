@@ -16,8 +16,7 @@ typedef struct core_state {
     // ------------------------------------
     // Set by hardware layer
     // ------------------------------------
-    display_hardware_t *displayHw;
-    void *displayHwUser;
+    display_state_t *display;
     core_button_probe_t buttonProbe;
     eeprom_access_t *externalMemory;
 
@@ -34,8 +33,6 @@ typedef struct core_state {
     timer_subscription_t subscriptionAccumulateTime;
 
     uint8_t minutesElapsedSinceLastTimeSave;
-
-    display_state_t display;
 } core_state_t;
 
 #ifdef __cplusplus

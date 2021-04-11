@@ -13,7 +13,7 @@ static display_hardware_status_t displayShowTime(void *user, uint8_t hour, uint8
     display_view_t currentView = EDISPVIEW_CLOCK;
     uint8_t d0, d1, d2, d3;
 
-    displayGetCurrentView(&state->display, &currentView);
+    displayGetCurrentView(&state->state, &currentView);
 
     if (currentView == EDISPVIEW_CLOCK) {
         decomposeDigits(hour, &d0, &d1);
