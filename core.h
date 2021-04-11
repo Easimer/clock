@@ -4,7 +4,6 @@
 #include <stdint.h>
 
 #include "actions.h"
-#include "7seg.h"
 #include "display.h"
 #include "timer.h"
 #include "timekeeper.h"
