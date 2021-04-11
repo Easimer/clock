@@ -15,9 +15,6 @@ static void displayDigits(void *user, uint16_t millis_elapsed);
 static void accumulateTime(void *user, uint16_t millisElapsed);
 static void decomposeDigits(uint8_t num, uint8_t *dh, uint8_t *dl);
 
-static display_hardware_status_t displayShowTime(void *user, uint8_t hour, uint8_t minute, uint8_t second);
-static display_hardware_status_t displayShowIcon(void *user, display_icon_t icon);
-
 static actions_button_descriptor_t btnCommonDescriptor = {
     .probe = probeButton,
     .pressed = NULL,
