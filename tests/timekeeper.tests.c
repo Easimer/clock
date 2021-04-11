@@ -8,10 +8,7 @@ typedef struct Timekeeper {
 
 UTEST_F_SETUP(Timekeeper) {
     TIMEKEEPER_SETUP_BUFFER_IN(utest_fixture, tk);
-    timekeeperSet(utest_fixture->tk, 0, 0, 0);
-
-    // call accumulate to clear the set flag
-    timekeeperAccumulate(utest_fixture->tk, 0);
+    timekeeperInit(utest_fixture->tk);
 }
 
 UTEST_F_TEARDOWN(Timekeeper) {
@@ -181,8 +178,38 @@ UTEST_F(Timekeeper, AccumulateHourWrap) {
     ASSERT_EQ(second, 0);
 }
 
+UTEST_F(Timekeeper, AccumulateDayWrap) {
+    uint8_t hour, minute, second;
+
+    timekeeperSet(utest_fixture->tk, 23, 59, 59);
+
+    timekeeperAccumulate(utest_fixture->tk, 1000);
+
+    timekeeperGet(utest_fixture->tk, &hour, &minute, &second);
+    ASSERT_EQ(hour, 0);
+    ASSERT_EQ(minute, 0);
+    ASSERT_EQ(second, 0);
+}
+
 UTEST_F(Timekeeper, SetFlag) {
     timekeeperSet(utest_fixture->tk, 12, 34, 56);
     int rc = timekeeperAccumulate(utest_fixture->tk, 0);
     ASSERT_EQ(rc, -3);
+}
+
+UTEST_F(Timekeeper, Init) {
+    uint8_t hour, minute, second;
+    timekeeperInit(utest_fixture->tk);
+
+    timekeeperGet(utest_fixture->tk, &hour, &minute, &second);
+    int rc = timekeeperAccumulate(utest_fixture->tk, 999);
+    ASSERT_EQ(rc, 0);
+
+    ASSERT_EQ(hour, 0);
+    ASSERT_EQ(minute, 0);
+    ASSERT_EQ(second, 0);
+}
+
+UTEST_F(Timekeeper, GetterNULL) {
+    timekeeperGet(utest_fixture->tk, NULL, NULL, NULL);
 }
