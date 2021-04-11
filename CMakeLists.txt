@@ -20,6 +20,8 @@ set(SRC_CORE
   eeprom_access.h
   eeprom_he.c
   eeprom_he.h
+  kprintf.c
+  kprintf.h
   timekeeper.c
   timekeeper.h
   timer.c

@@ -1,7 +1,7 @@
 #include <string.h>
 
 #include "core.h"
-#include "log.h"
+#include "kprintf.h"
 
 static void probeButton(actions_button_handle_t handle, void *user);
 static void clickButton(actions_button_handle_t handle, void *user);
@@ -67,13 +67,13 @@ static void saveTimeToEEPROM(core_state_t *state, timekeeper_t const *tk) {
 
     switch (rc) {
         case ETIMESAVE_IO_OK:
-            l_str_ln("[+] Saved time");
+            kprintf(LOG_SUCCESS "timesave: saved time\n");
             break;
         case ETIMESAVE_IO_ERASED:
-            l_str_ln("[+] timesave: first initialization");
+            kprintf(LOG_SUCCESS "timesave: first initialization\n");
             break;
         case ETIMESAVE_IO_WRITE_FAILURE:
-            l_str_ln("[-] timesave: couldn't save time: write failure");
+            kprintf(LOG_FAILURE "timesave: couldn't save time: write failure\n");
             break;
         default:
             break;
@@ -83,28 +83,28 @@ static void saveTimeToEEPROM(core_state_t *state, timekeeper_t const *tk) {
 static void restoreTimeFromEEPROM(core_state_t *state, timekeeper_t *tk) {
     timesave_io_status_t rc;
 
-    l_str_ln("[+] Restoring time from EEPROM...");
+    kprintf(LOG_SUCCESS "Restoring time from EEPROM...\n");
 
     rc = restoreTime(tk, &state->tsiocTime);
 
     switch (rc) {
         case ETIMESAVE_IO_OK:
-            l_str_ln("[+] Restored time");
+            kprintf(LOG_SUCCESS "Restored time\n");
             break;
         case ETIMESAVE_IO_BADSIG:
-            l_str_ln("[-] Couldn't restore time: bad signature (old version?)");
+            kprintf(LOG_FAILURE "Couldn't restore time: bad signature (old version?)\n");
             break;
         case ETIMESAVE_IO_BADCHK:
-            l_str_ln("[-] Couldn't restore time: bad checksum");
+            kprintf(LOG_FAILURE "Couldn't restore time: bad checksum\n");
             break;
         case ETIMESAVE_IO_READ_FAILURE:
-            l_str_ln("[-] Couldn't restore time: read failure");
+            kprintf(LOG_FAILURE "Couldn't restore time: read failure\n");
             break;
         case ETIMESAVE_IO_WRITE_FAILURE:
-            l_str_ln("[-] Couldn't restore time: write failure");
+            kprintf(LOG_FAILURE "Couldn't restore time: write failure\n");
             break;
         case ETIMESAVE_IO_ERASED:
-            l_str_ln("[+] Time wasn't restored: first initialization");
+            kprintf(LOG_SUCCESS "Time wasn't restored: first initialization\n");
             break;
         default:
             break;
@@ -169,7 +169,7 @@ static display_hardware_status_t displayShowIcon(void *user, display_icon_t icon
 }
 
 int coreInit(core_state_t *state) {
-    int rc;
+    uint8_t rc;
 
     TIMEKEEPER_SETUP_BUFFER_IN(state, tkTime);
     state->saveTimeToROM = 0;
@@ -177,40 +177,36 @@ int coreInit(core_state_t *state) {
 
     timerSetup(TIMER_ID1);
 
-    l_str_ln("[+] Creating main timekeeper");
+    kprintf(LOG_SUCCESS "Creating main timekeeper\n");
     timekeeperInit(state->tkTime);
 
-    l_str_ln("[+] Initializing time save/restore mechanism");
+    kprintf(LOG_SUCCESS "Initializing time save/restore mechanism\n");
     timesave_io_status_t tsioStatus = fillTimesaveConfig(&state->tsiocTime, state->externalMemory, 0);
     if (tsioStatus != ETIMESAVE_IO_OK) {
-        l_str("[+] timesave: fillTimesaveConfig failed with rc=");
-        l_num_ln(tsioStatus);
+        kprintf(LOG_FAILURE "timesave: fillTimesaveConfig failed with rc=%b\n", (uint8_t)tsioStatus);
     }
     else {
         restoreTimeFromEEPROM(state, state->tkTime);
     }
 
-    l_str_ln("[+] Setting up actions subsystem");
+    kprintf(LOG_SUCCESS "Setting up actions subsystem\n");
     actionsInit();
 
     if ((rc = actionsCreateButton(&state->btnSetTime, state, &btnCommonDescriptor)) != EACTIONS_OK) {
-        l_str("[!] actionsCreateButton failed: ");
-        l_num_ln(rc);
+        kprintf(LOG_ERROR "actionsCreateButton failed: %b\n", rc);
     }
 
     if ((rc = actionsCreateButton(&state->btnStopwatch, state, &btnCommonDescriptor)) != EACTIONS_OK) {
-        l_str("[!] actionsCreateButton failed: ");
-        l_num_ln(rc);
+        kprintf(LOG_ERROR "actionsCreateButton failed: %b\n", rc);
     }
 
-    l_str_ln("[+] Initializing display subsystem");
+    kprintf(LOG_SUCCESS "Initializing display subsystem\n");
     state->display.hw = &state->displayHw;
     state->display.user = state;
     state->displayHw.showIcon = displayShowIcon;
     state->displayHw.showTime = displayShowTime;
     if ((rc = displayInit(&state->display)) != EDISP_OK) {
-        l_str("[!] displayInit failed: ");
-        l_num_ln(rc);
+        kprintf(LOG_ERROR "displayInit failed: %b\n", rc);
     }
 
     timerSubscribe(TIMER_ID1, &state->subscriptionDisplayDigits, state, displayDigits);

@@ -1,6 +1,6 @@
 #include "config.h"
 #include "core.h"
-#include "log.h"
+#include "kprintf.h"
 
 typedef struct display_pins {
   uint8_t digit[4];
@@ -76,6 +76,8 @@ static void setupTimer1Interrupts() {
   TIMSK1 |= (1 << OCIE1A);
 }
 
+extern "C" {
+
 void logPrintLnString(char const *s) {
     Serial.println(s);
 }
@@ -92,6 +94,8 @@ void logPrintNumber(uint16_t n) {
     Serial.print(n);
 }
 
+}
+
 ISR(TIMER1_COMPA_vect) {
     coreElapsed(&coreState, 1);
 }
@@ -99,7 +103,7 @@ ISR(TIMER1_COMPA_vect) {
 void setup() {
   Serial.begin(115200);
 
-  l_str_ln("[+] Initializing display");
+  kprintf(LOG_SUCCESS "Initializing display\n");
 
   for(uint8_t i = 0; i < 4; i++) {
     pinMode(displayPins.digit[i], OUTPUT);
@@ -113,25 +117,25 @@ void setup() {
 
   d7segDisplayDec(&displayCtl, 8, 0, 0, 0);
 
-  l_str_ln("[+] Initializing EEPROM");
+  kprintf(LOG_SUCCESS "Initializing EEPROM\n");
   extmemInit();
   coreState.externalMemory = extmemGetAccess();
 
-  l_str_ln("[+] Initializing buttons");
+  kprintf(LOG_SUCCESS "Initializing buttons\n");
   pinMode(PIN_BUTTON_0, INPUT_PULLUP);
   pinMode(PIN_BUTTON_1, INPUT_PULLUP);
   pinMode(PIN_BUTTON_2, INPUT_PULLUP);
   pinMode(PIN_BUTTON_3, INPUT_PULLUP);
 
-  l_str_ln("[+] Setting up TIMER1 interrupts");
+  kprintf(LOG_SUCCESS "Setting up TIMER1 interrupts\n");
   cli();
   setupTimer1Interrupts();
   sei();
 
-  l_str_ln("[+] Initializing core");
+  kprintf(LOG_SUCCESS "Initializing core\n");
   coreInit(&coreState);
 
-  l_str_ln("[+] Initialization done");
+  kprintf(LOG_SUCCESS "Initialization done\n");
 
   timerEnable(TIMER_ID1);
 }
