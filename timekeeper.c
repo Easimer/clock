@@ -23,17 +23,17 @@ void timekeeperInit(timekeeper_t *buffer) {
 }
 
 void timekeeperSet(timekeeper_t *tk, uint8_t hour, uint8_t minute, uint8_t second) {
-    while (second > 60) {
+    while (second >= 60) {
         minute += 1;
         second -= 60;
     }
 
-    while(minute > 60) {
+    while(minute >= 60) {
         hour += 1;
         minute -= 60;
     }
 
-    while(hour > 24) {
+    while(hour >= 24) {
         hour -= 24;
     }
 
