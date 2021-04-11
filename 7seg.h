@@ -1,6 +1,10 @@
 #ifndef CLOCK_7SEG_H
 #define CLOCK_7SEG_H
 
+/*
+ * Hardware abstraction for 4 digit 7-segment displays
+ */
+
 typedef enum d7seg_digit {
   D7SEG_DIGIT0 = 0,
   D7SEG_DIGIT1,
@@ -21,7 +25,7 @@ typedef enum d7seg_segment {
 typedef void (*d7seg_ctl_select)(void *context, uint8_t digit);
 typedef void (*d7seg_ctl_segment)(void *context, uint8_t segment, uint8_t state);
 
-typedef struct display_ctl {
+typedef struct d7seg_ctl {
   void *context;
   d7seg_ctl_select select;
   d7seg_ctl_segment segment;

@@ -1,6 +1,7 @@
 #include "config.h"
 #include "core.h"
 #include "kprintf.h"
+#include "display_7seg.h"
 
 typedef struct display_pins {
   uint8_t digit[4];
@@ -35,7 +36,7 @@ static void display_segment_cb(void *context, uint8_t segment, uint8_t state) {
   digitalWrite(pins->segment[segment], state != 0 ? HIGH : LOW);
 }
 
-static d7seg_ctl_t displayCtl = {
+static d7seg_ctl_t display7SegCtl = {
   .context = &displayPins,
   .select = display_select_cb,
   .segment = display_segment_cb,
@@ -53,8 +54,12 @@ static uint8_t buttonProbe(uint8_t idx) {
   return (digitalRead(pins[idx]) == LOW) ? 1 : 0;
 }
 
+static display_7seg_t display;
+
 static core_state_t coreState = {
-  .displayCtl = &displayCtl,
+  .displayHw = &display.display,
+  .displayHwUser = &display,
+
   .buttonProbe = buttonProbe,
   .externalMemory = NULL,
 };
@@ -115,7 +120,8 @@ void setup() {
     digitalWrite(displayPins.segment[i], LOW);
   }
 
-  d7segDisplayDec(&displayCtl, 8, 0, 0, 0);
+  d7segDisplayDec(&display7SegCtl, 8, 0, 0, 0);
+  d7segInitDescriptor(&display, &display7SegCtl);
 
   kprintf(LOG_SUCCESS "Initializing EEPROM\n");
   extmemInit();

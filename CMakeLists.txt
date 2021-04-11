@@ -17,6 +17,8 @@ set(SRC_CORE
   core.h
   display.c
   display.h
+  display_7seg.c
+  display_7seg.h
   eeprom_access.h
   eeprom_he.c
   eeprom_he.h

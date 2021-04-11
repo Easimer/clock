@@ -134,40 +134,6 @@ static void accumulateTime(void *user, uint16_t millisElapsed) {
     }
 }
 
-static void decomposeDigits(uint8_t num, uint8_t *dh, uint8_t *dl) {
-    *dh = num / 10;
-    *dl = num % 10;
-}
-
-static display_hardware_status_t displayShowTime(void *user, uint8_t hour, uint8_t minute, uint8_t second) {
-    core_state_t *state = (core_state_t *)user;
-    display_view_t currentView = EDISPVIEW_CLOCK;
-    uint8_t d0, d1, d2, d3;
-
-    displayGetCurrentView(&state->display, &currentView);
-
-    if (currentView == EDISPVIEW_CLOCK) {
-        decomposeDigits(hour, &d0, &d1);
-        decomposeDigits(minute, &d2, &d3);
-    } else {
-        if (hour == 0) {
-            decomposeDigits(minute, &d0, &d1);
-            decomposeDigits(second, &d2, &d3);
-        } else {
-            decomposeDigits(hour, &d0, &d1);
-            decomposeDigits(minute, &d2, &d3);
-        }
-    }
-    
-    d7segDisplayDec(state->displayCtl, d0, d1, d2, d3);
-
-    return EDISPHW_OK;
-}
-
-static display_hardware_status_t displayShowIcon(void *user, display_icon_t icon) {
-    return EDISPHW_UNSUPPORTED;
-}
-
 int coreInit(core_state_t *state) {
     uint8_t rc;
 
@@ -201,10 +167,8 @@ int coreInit(core_state_t *state) {
     }
 
     kprintf(LOG_SUCCESS "Initializing display subsystem\n");
-    state->display.hw = &state->displayHw;
-    state->display.user = state;
-    state->displayHw.showIcon = displayShowIcon;
-    state->displayHw.showTime = displayShowTime;
+    state->display.hw = state->displayHw;
+    state->display.user = state->displayHwUser;
     if ((rc = displayInit(&state->display)) != EDISP_OK) {
         kprintf(LOG_ERROR "displayInit failed: %b\n", rc);
     }
