@@ -28,10 +28,10 @@ void kprintf(char const *fmt, ...) {
                 l_str(va_arg(ap, char const *));
                 break;
             case 'b':
-                l_num(va_arg(ap, uint8_t));
+                l_num((uint8_t)va_arg(ap, int));
                 break;
             case 'w':
-                l_num(va_arg(ap, uint16_t));
+                l_num((uint16_t)va_arg(ap, int));
                 break;
             case '%':
                 l_str("%");
