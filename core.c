@@ -1,6 +1,7 @@
 #include <string.h>
 
 #include "core.h"
+#include "config.h"
 #include "kprintf.h"
 
 static void probeButton(actions_button_handle_t handle, void *user);
@@ -126,7 +127,7 @@ static void accumulateTime(void *user, uint16_t millisElapsed) {
         if (change > 1 || change < -1) {
             state->minutesElapsedSinceLastTimeSave += 1;
 
-            if (state->minutesElapsedSinceLastTimeSave >= 5) {
+            if (state->minutesElapsedSinceLastTimeSave >= TIMESAVE_INTERVAL_MINUTES) {
                 state->saveTimeToROM = 1;
                 state->minutesElapsedSinceLastTimeSave = 0;
             }
