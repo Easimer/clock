@@ -72,7 +72,7 @@ timesave_io_status_t saveTime(timekeeper_t const *tk, timesave_io_config_t *cfg)
     if (cfg->emhe.access->read(cfg->emhe.access->user, cfg->startAddress, 1, 1, &bufSignature) != 0 || bufSignature != SIGNATURE) {
         // Bad signature, try to reset the data storage
         bufSignature = SIGNATURE;
-        if (cfg->emhe.access->write(cfg->emhe.access->user, cfg->startAddress, 1, 1, bufSignature) != 0) {
+        if (cfg->emhe.access->write(cfg->emhe.access->user, cfg->startAddress, 1, 1, &bufSignature) != 0) {
             return ETIMESAVE_IO_WRITE_FAILURE;
         }
 
