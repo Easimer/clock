@@ -21,7 +21,7 @@ typedef struct timekeeper timekeeper_t;
     timekeeper_t *name
 
 #define TIMEKEEPER_SETUP_BUFFER_IN(container, name) \
-    container->name = (timekeeper_t*)state->tkbuf_##name;
+    container->name = (timekeeper_t*)container->tkbuf_##name;
 
 #ifdef __cplusplus
 extern "C" {
