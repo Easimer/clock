@@ -9,8 +9,8 @@ set(C_EXTENSIONS OFF)
 set(SRC_CORE
   config.h
 
-  7seg.c
-  7seg.h
+  7seg_bcd_mux.c
+  7seg_bcd_mux.h
   actions.c
   actions.h
   core.c

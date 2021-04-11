@@ -1,6 +1,6 @@
 #include <stddef.h>
 #include <stdint.h>
-#include "7seg.h"
+#include "7seg_bcd_mux.h"
 
 // DP, G, F, E, D, C, B, A
 static uint8_t digitSegmentBits[16] = {

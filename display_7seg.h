@@ -7,7 +7,7 @@
 
 #include "config.h"
 #include "display.h"
-#include "7seg.h"
+#include "7seg_bcd_mux.h"
 
 typedef struct display_7seg {
     display_state_t state;
