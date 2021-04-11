@@ -3,19 +3,13 @@
 
 #include <stdint.h>
 
-typedef int (*eeprom_access_read_t)(void *user, uint16_t address, uint8_t *value);
-typedef int (*eeprom_access_write_t)(void *user, uint16_t address, uint8_t value);
-
-typedef int (*eeprom_access_read32_t)(void *user, uint16_t address, uint8_t *value);
-typedef int (*eeprom_access_write32_t)(void *user, uint16_t address, uint8_t const *value);
+typedef int (*eeprom_access_read_t)(void *user, uint16_t address, uint8_t size, uint8_t nmemb, uint8_t *ptr);
+typedef int (*eeprom_access_write_t)(void *user, uint16_t address, uint8_t size, uint8_t nmemb, uint8_t const *ptr);
 
 typedef struct eeprom_access {
     void *user;
     eeprom_access_read_t read;
     eeprom_access_write_t write;
-
-    eeprom_access_read32_t read32;
-    eeprom_access_write32_t write32;
 } eeprom_access_t;
 
 void extmemInit();

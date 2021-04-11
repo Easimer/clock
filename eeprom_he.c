@@ -18,7 +18,7 @@ static int findAddress(emhe_descriptor_t const *D, uint8_t *outAddr) {
 	uint16_t lastAddr = addr + D->elementCount;
 
 	do {
-		rc = D->access->read(D->access->user, addr, &cur);
+		rc = D->access->read(D->access->user, addr, 1, 1, &cur);
 		if (rc != 0) { return rc; }
 
 		addr++;
@@ -26,7 +26,7 @@ static int findAddress(emhe_descriptor_t const *D, uint8_t *outAddr) {
 			break;
 		}
 
-		rc = D->access->read(D->access->user, addr, &next);
+		rc = D->access->read(D->access->user, addr, 1, 1, &next);
 		if (rc != 0) { return rc; }
 	} while (next == cur + 1);
 
@@ -37,23 +37,19 @@ static int findAddress(emhe_descriptor_t const *D, uint8_t *outAddr) {
 
 static int zeroStatusBuffer(emhe_descriptor_t *D) {
 	int rc;
-	uint8_t const zero[4] = { 0, 0, 0, 0 };
+	uint8_t const zero[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
 
 	uint8_t remaining = D->elementCount;
 	uint16_t addr = getStatusBufferAddress(D, 0);
 
-	while (remaining >= 4) {
-		rc = D->access->write32(D->access->user, addr, zero);
-		if (rc != 0) return rc;
-
-		addr += 4;
-		remaining -= 4;
+	while(remaining >= 8) {
+		rc = D->access->write(D->access->user, addr, 8, 1, zero);
+		addr += 8;
+		remaining -= 8;
 	}
-
-	while (remaining > 0) {
-		rc = D->access->write(D->access->user, addr, zero[0]);
-		if (rc != 0) return rc;
-
+	
+	while(remaining > 0) {
+		rc = D->access->write(D->access->user, addr, 1, 1, zero);
 		addr++;
 		remaining--;
 	}
@@ -96,23 +92,7 @@ int emheRead(emhe_descriptor_t *D, void *buffer) {
 	uint8_t remaining = D->elementSize;
 	uint8_t *dst = (uint8_t *)buffer;
 
-	while (remaining >= 4) {
-		rc = D->access->read32(D->access->user, addr, dst);
-		if (rc != 0) return rc;
-
-		dst += 4;
-		addr += 4;
-		remaining -= 4;
-	}
-
-	while (remaining > 0) {
-		rc = D->access->read(D->access->user, addr, dst);
-		if (rc != 0) return rc;
-
-		dst++;
-		addr++;
-		remaining--;
-	}
+	rc = D->access->read(D->access->user, addr, D->elementSize, 1, dst);
 
 	return 0;
 }
@@ -125,7 +105,7 @@ int emheWrite(emhe_descriptor_t *D, void const *buffer) {
 	int rc;
 	uint8_t status;
 	uint16_t sAddr = getStatusBufferAddress(D, D->pointer);
-	rc = D->access->read(D->access, sAddr, &status);
+	rc = D->access->read(D->access, sAddr, 1, 1, &status);
 	if (rc != 0) return rc;
 
 	if (D->pointer + 1 == D->elementCount) {
@@ -140,25 +120,11 @@ int emheWrite(emhe_descriptor_t *D, void const *buffer) {
 	uint8_t remaining = D->elementSize;
 	uint8_t const *src = (uint8_t const *)buffer;
 
-	while (remaining >= 4) {
-		rc = D->access->write32(D->access->user, pAddr, src);
-		if (rc != 0) return rc;
+	rc = D->access->write(D->access->user, pAddr, D->elementSize, 1, src);
+	if (rc != 0) return rc;
 
-		src += 4;
-		pAddr += 4;
-		remaining -= 4;
-	}
-
-	while (remaining > 1) {
-		rc = D->access->write(D->access->user, pAddr, src[0]);
-		if (rc != 0) return rc;
-
-		src++;
-		pAddr++;
-		remaining--;
-	}
-
-	rc = D->access->write(D->access->user, sAddr, status + 1);
+	status++;
+	rc = D->access->write(D->access->user, sAddr, 1, 1, &status);
 	if (rc != 0) return rc;
 
 	return 0;

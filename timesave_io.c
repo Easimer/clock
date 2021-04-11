@@ -37,7 +37,7 @@ timesave_io_status_t restoreTime(timekeeper_t *tk, timesave_io_config_t *cfg) {
     }
 
     uint8_t bufSignature = 0;
-    if (cfg->emhe.access->read(cfg->emhe.access->user, cfg->startAddress, &bufSignature) != 0 || bufSignature != SIGNATURE) {
+    if (cfg->emhe.access->read(cfg->emhe.access->user, cfg->startAddress, 1, 1, &bufSignature) != 0 || bufSignature != SIGNATURE) {
         return ETIMESAVE_IO_BADSIG;
     }
 
@@ -69,9 +69,10 @@ timesave_io_status_t saveTime(timekeeper_t const *tk, timesave_io_config_t *cfg)
         return ETIMESAVE_IO_INVALID_ARG;
     }
 
-    if (cfg->emhe.access->read(cfg->emhe.access->user, cfg->startAddress, &bufSignature) != 0 || bufSignature != SIGNATURE) {
+    if (cfg->emhe.access->read(cfg->emhe.access->user, cfg->startAddress, 1, 1, &bufSignature) != 0 || bufSignature != SIGNATURE) {
         // Bad signature, try to reset the data storage
-        if (cfg->emhe.access->write(cfg->emhe.access->user, cfg->startAddress, SIGNATURE) != 0) {
+        bufSignature = SIGNATURE;
+        if (cfg->emhe.access->write(cfg->emhe.access->user, cfg->startAddress, 1, 1, bufSignature) != 0) {
             return ETIMESAVE_IO_WRITE_FAILURE;
         }
 
@@ -83,7 +84,7 @@ timesave_io_status_t saveTime(timekeeper_t const *tk, timesave_io_config_t *cfg)
         ret = ETIMESAVE_IO_ERASED;
     }
 
-    if (cfg->emhe.access->read(cfg->emhe.access->user, cfg->startAddress, &bufSignature) != 0 || bufSignature != SIGNATURE) {
+    if (cfg->emhe.access->read(cfg->emhe.access->user, cfg->startAddress, 1, 1, &bufSignature) != 0 || bufSignature != SIGNATURE) {
         return ETIMESAVE_IO_BADSIG;
     }
 
