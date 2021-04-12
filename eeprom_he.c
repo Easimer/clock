@@ -105,7 +105,7 @@ int emheWrite(emhe_descriptor_t *D, void const *buffer) {
 	int rc;
 	uint8_t status;
 	uint16_t sAddr = getStatusBufferAddress(D, D->pointer);
-	rc = D->access->read(D->access, sAddr, 1, 1, &status);
+	rc = D->access->read(D->access->user, sAddr, 1, 1, &status);
 	if (rc != 0) return rc;
 
 	if (D->pointer + 1 == D->elementCount) {
