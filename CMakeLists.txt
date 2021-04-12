@@ -38,6 +38,9 @@ set(SRC_TESTS
   tests/eeprom_he.tests.c
   tests/timekeeper.tests.c
   tests/timer.tests.c
+
+  tests/ram_eeprom.c
+  tests/ram_eeprom.h
 )
 
 add_library(clock_core ${SRC_CORE})

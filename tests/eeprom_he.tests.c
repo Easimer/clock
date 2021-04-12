@@ -1,6 +1,7 @@
 #include "utest.h"
 
 #include "eeprom_he.h"
+#include "ram_eeprom.h"
 
 UTEST_MAIN();
 
@@ -8,54 +9,13 @@ UTEST_MAIN();
 
 struct EepromHE {
     eeprom_access_t access;
-    
-    union {
-        struct {
-            uint8_t status[EEPROM_ELEMENTS];
-            uint32_t parameter[EEPROM_ELEMENTS];
-        } buffers;
-        uint8_t raw[1];
-    };
-
+    ram_eeprom_buffer_t memory;
     emhe_descriptor_t descriptor;
 };
 
-static int eeprom_read(void *user, uint16_t address, uint8_t count, uint8_t nmemb, uint8_t *value) {
-    struct EepromHE *state = (struct EepromHE *)user;
-
-    unsigned total = count * nmemb;
-
-    if (address + total > sizeof(state->buffers)) {
-        return 1;
-    }
-
-    for (unsigned i = 0; i < total; i++) {
-        value[i] = state->raw[address + i];
-    }
-
-    return 0;
-}
-
-static int eeprom_write(void *user, uint16_t address, uint8_t count, uint8_t nmemb, uint8_t const *value) {
-    struct EepromHE *state = (struct EepromHE *)user;
-
-    unsigned total = count * nmemb;
-
-    if (address + total > sizeof(state->buffers)) {
-        return 1;
-    }
-
-    for (unsigned i = 0; i < total; i++) {
-        state->raw[address + i] = value[i];
-    }
-
-    return 0;
-}
-
 UTEST_F_SETUP(EepromHE) {
-    utest_fixture->access.user = utest_fixture;
-    utest_fixture->access.read = eeprom_read;
-    utest_fixture->access.write = eeprom_write;
+    ramEepromFillDescriptor(&utest_fixture->access, &utest_fixture->memory);
+    ramEepromClear(&utest_fixture->memory);
 
     utest_fixture->descriptor.access = &utest_fixture->access;
     utest_fixture->descriptor.address = 0;
@@ -69,8 +29,6 @@ UTEST_F_TEARDOWN(EepromHE) {
 
 UTEST_F(EepromHE, Init) {
     int rc;
-
-    memset(&utest_fixture->buffers, 0, sizeof(utest_fixture->buffers));
 
     utest_fixture->descriptor.flags = EMHE_F_RESET;
     rc = emheInit(&utest_fixture->descriptor);
@@ -86,9 +44,7 @@ UTEST_F(EepromHE, ReadFirst) {
 
     uint32_t const expected = 0xDEADBEEF;
 
-    memset(&utest_fixture->buffers, 0, sizeof(utest_fixture->buffers));
-
-    utest_fixture->buffers.parameter[0] = expected;
+    utest_fixture->memory.buffers.parameter[0] = expected;
 
     rc = emheInit(&utest_fixture->descriptor);
     ASSERT_EQ(rc, 0);
@@ -105,13 +61,11 @@ UTEST_F(EepromHE, ReadNth) {
 
     uint32_t const expected = 0xDEADBEEF;
 
-    memset(&utest_fixture->buffers, 0, sizeof(utest_fixture->buffers));
-
     for (int i = 0; i < 10; i++) {
-        utest_fixture->buffers.status[i] = i;
+        utest_fixture->memory.buffers.status[i] = i;
     }
 
-    utest_fixture->buffers.parameter[9] = expected;
+    utest_fixture->memory.buffers.parameter[9] = expected;
 
     rc = emheInit(&utest_fixture->descriptor);
     ASSERT_EQ(rc, 0);
@@ -126,15 +80,13 @@ UTEST_F(EepromHE, WriteFirst) {
     int rc;
     uint32_t const expected = 0xDEADBEEF;
 
-    memset(&utest_fixture->buffers, 0, sizeof(utest_fixture->buffers));
-
     rc = emheInit(&utest_fixture->descriptor);
     ASSERT_EQ(rc, 0);
 
     rc = emheWrite(&utest_fixture->descriptor, &expected);
     ASSERT_EQ(rc, 0);
 
-    ASSERT_EQ(utest_fixture->buffers.parameter[1], expected);
+    ASSERT_EQ(utest_fixture->memory.buffers.parameter[1], expected);
     ASSERT_EQ(emheGetPointer(&utest_fixture->descriptor), 1);
 }
 
@@ -142,10 +94,8 @@ UTEST_F(EepromHE, WriteNth) {
     int rc;
     uint32_t const expected = 0xDEADBEEF;
 
-    memset(&utest_fixture->buffers, 0, sizeof(utest_fixture->buffers));
-
     for (int i = 0; i < 10; i++) {
-        utest_fixture->buffers.status[i] = i;
+        utest_fixture->memory.buffers.status[i] = i;
     }
 
     rc = emheInit(&utest_fixture->descriptor);
@@ -154,8 +104,8 @@ UTEST_F(EepromHE, WriteNth) {
     rc = emheWrite(&utest_fixture->descriptor, &expected);
     ASSERT_EQ(rc, 0);
 
-    ASSERT_EQ(utest_fixture->buffers.status[10], 10);
-    ASSERT_EQ(utest_fixture->buffers.parameter[10], expected);
+    ASSERT_EQ(utest_fixture->memory.buffers.status[10], 10);
+    ASSERT_EQ(utest_fixture->memory.buffers.parameter[10], expected);
     ASSERT_EQ(emheGetPointer(&utest_fixture->descriptor), 10);
 }
 
@@ -164,12 +114,10 @@ UTEST_F(EepromHE, ReadWrapping) {
     uint32_t const expected = 0xDEADBEEF;
     uint32_t buf[1];
 
-    memset(&utest_fixture->buffers, 0, sizeof(utest_fixture->buffers));
-
     for (int i = 0; i < 16; i++) {
-        utest_fixture->buffers.status[i] = i;
+        utest_fixture->memory.buffers.status[i] = i;
     }
-    utest_fixture->buffers.parameter[15] = expected;
+    utest_fixture->memory.buffers.parameter[15] = expected;
 
     rc = emheInit(&utest_fixture->descriptor);
     ASSERT_EQ(rc, 0);
@@ -185,10 +133,8 @@ UTEST_F(EepromHE, WriteWrapping) {
     int rc;
     uint32_t const expected = 0xDEADBEEF;
 
-    memset(&utest_fixture->buffers, 0, sizeof(utest_fixture->buffers));
-
     for (int i = 0; i < 16; i++) {
-        utest_fixture->buffers.status[i] = i;
+        utest_fixture->memory.buffers.status[i] = i;
     }
 
     rc = emheInit(&utest_fixture->descriptor);
@@ -197,16 +143,14 @@ UTEST_F(EepromHE, WriteWrapping) {
     rc = emheWrite(&utest_fixture->descriptor, &expected);
     ASSERT_EQ(rc, 0);
 
-    ASSERT_EQ(utest_fixture->buffers.status[0], 16);
+    ASSERT_EQ(utest_fixture->memory.buffers.status[0], 16);
     ASSERT_EQ(emheGetPointer(&utest_fixture->descriptor), 0);
-    ASSERT_EQ(utest_fixture->buffers.parameter[0], expected);
+    ASSERT_EQ(utest_fixture->memory.buffers.parameter[0], expected);
 }
 
 UTEST_F(EepromHE, Sequence) {
     int rc;
     uint32_t rd;
-
-    memset(&utest_fixture->buffers, 0, sizeof(utest_fixture->buffers));
 
     for (uint32_t i = 0; i < 255; i++) {
         utest_fixture->descriptor.flags = EMHE_F_NONE;
