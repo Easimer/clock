@@ -76,6 +76,28 @@ UTEST_F(Core, SetMinuteButton) {
     ASSERT_EQ(second, 0);
 }
 
+UTEST_F(Core, SetHourButton) {
+    int rc;
+    uint8_t hour, minute, second;
+    timekeeper_t *tkClock;
+
+    tkClock = coreGetClock(&utest_fixture->coreState);
+
+    // Press the `set time` button five times
+    for (int i = 0; i < 5; i++) {
+        utest_fixture->buttonStates[3] = 1;
+        rc = coreElapsed(&utest_fixture->coreState, 1);
+        rc = coreElapsed(&utest_fixture->coreState, ACTIONS_LONG_PRESS_MIN_MILLISECONDS);
+        utest_fixture->buttonStates[3] = 0;
+        rc = coreElapsed(&utest_fixture->coreState, 1);
+    }
+
+    timekeeperGet(tkClock, &hour, &minute, &second);
+    ASSERT_EQ(hour, 5);
+    ASSERT_EQ(minute, 0);
+    ASSERT_EQ(second, 0);
+}
+
 static uint8_t coreButtonProbe(void *user, uint8_t btnIdx) {
     state_t *state = (state_t *)user;
     if (btnIdx >= 4) {
