@@ -68,3 +68,35 @@ UTEST_F(TimesaveIO, RestoreFailsOnCleanEeprom) {
     rc = restoreTime(tkTime, &utest_fixture->config);
     ASSERT_EQ(rc, ETIMESAVE_IO_BADSIG);
 }
+
+UTEST_F(TimesaveIO, RestoreNullTimekeeper) {
+    timesave_io_status_t rc;
+
+    rc = restoreTime(NULL, &utest_fixture->config);
+    ASSERT_EQ(rc, ETIMESAVE_IO_INVALID_ARG);
+}
+
+UTEST_F(TimesaveIO, RestoreNullConfig) {
+    timesave_io_status_t rc;
+    TIMEKEEPER_CREATE_ON_STACK(tkTime);
+
+    rc = restoreTime(tkTime, NULL);
+    ASSERT_EQ(rc, ETIMESAVE_IO_INVALID_ARG);
+}
+
+UTEST_F(TimesaveIO, BadChecksum) {
+    timesave_io_status_t rc;
+    TIMEKEEPER_CREATE_ON_STACK(tkTime);
+
+    rc = saveTime(tkTime, &utest_fixture->config);
+    ASSERT_EQ(rc, ETIMESAVE_IO_ERASED);
+
+    // Add one to each value in the parameter buffer to make the
+    // checksum invalid
+    for (int i = 0; i < EEPROM_ELEMENTS; i++) {
+        utest_fixture->memory.buffers.parameter[i]++;
+    }
+
+    rc = restoreTime(tkTime, &utest_fixture->config);
+    ASSERT_EQ(rc, ETIMESAVE_IO_BADCHK);
+}
