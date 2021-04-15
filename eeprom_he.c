@@ -44,12 +44,14 @@ static int zeroStatusBuffer(emhe_descriptor_t *D) {
 
 	while(remaining >= 8) {
 		rc = D->access->write(D->access->user, addr, 8, 1, zero);
+		if (rc != 0) return rc;
 		addr += 8;
 		remaining -= 8;
 	}
 	
 	while(remaining > 0) {
 		rc = D->access->write(D->access->user, addr, 1, 1, zero);
+		if (rc != 0) return rc;
 		addr++;
 		remaining--;
 	}
@@ -89,12 +91,11 @@ int emheRead(emhe_descriptor_t *D, void *buffer) {
 
 	int rc;
 	uint16_t addr = getParameterBufferAddress(D, D->pointer);
-	uint8_t remaining = D->elementSize;
 	uint8_t *dst = (uint8_t *)buffer;
 
 	rc = D->access->read(D->access->user, addr, D->elementSize, 1, dst);
 
-	return 0;
+	return rc;
 }
 
 int emheWrite(emhe_descriptor_t *D, void const *buffer) {
@@ -117,7 +118,6 @@ int emheWrite(emhe_descriptor_t *D, void const *buffer) {
 	uint16_t pAddr = getParameterBufferAddress(D, D->pointer);
 	sAddr = getStatusBufferAddress(D, D->pointer);
 
-	uint8_t remaining = D->elementSize;
 	uint8_t const *src = (uint8_t const *)buffer;
 
 	rc = D->access->write(D->access->user, pAddr, D->elementSize, 1, src);

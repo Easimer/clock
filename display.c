@@ -2,11 +2,6 @@
 #include "config.h"
 #include "display.h"
 
-static void decomposeDigits(uint8_t num, uint8_t *dh, uint8_t *dl) {
-    *dh = num / 10;
-    *dl = num % 10;
-}
-
 display_status_t displayInit(display_state_t *display) {
     assert(display != NULL);
     if (display == NULL) {

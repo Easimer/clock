@@ -207,9 +207,7 @@ static display_hardware_status_t showIcon(void *user, display_icon_t icon) {
 }
 
 void logPrintString(char const *s) {
-    printf("%s", s);
 }
 
 void logPrintNumber(uint16_t n) {
-    printf("%u", n);
 }
