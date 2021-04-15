@@ -29,9 +29,9 @@ static void probeButton(actions_button_handle_t handle, void *user) {
     uint8_t btnState = 0;
 
     if (handle == state->btnStopwatch) {
-        btnState = state->buttonProbe(2);
+        btnState = state->buttonProbe(state->buttonProbeUser, 2);
     } else if (handle == state->btnSetTime) {
-        btnState = state->buttonProbe(3);
+        btnState = state->buttonProbe(state->buttonProbeUser, 3);
     }
 
     actionsSetButtonState(handle, btnState);

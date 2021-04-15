@@ -18,11 +18,12 @@ typedef struct Core {
     uint8_t buttonStates[4];
 } state_t;
 
-static uint8_t coreButtonProbe(uint8_t btnIdx);
+static uint8_t coreButtonProbe(void *user, uint8_t btnIdx);
 static display_hardware_status_t showTime(void *user, uint8_t hour, uint8_t minute, uint8_t second);
 static display_hardware_status_t showIcon(void *user, display_icon_t icon);
 
 UTEST_F_SETUP(Core) {
+    utest_fixture->coreState.buttonProbeUser = utest_fixture;
     utest_fixture->coreState.buttonProbe = coreButtonProbe;
     utest_fixture->coreState.externalMemory = &utest_fixture->memoryAccess;
     ramEepromFillDescriptor(&utest_fixture->memoryAccess, &utest_fixture->memory);
@@ -47,8 +48,13 @@ UTEST_F(Core, InitialClockTime) {
     ASSERT_EQ(utest_fixture->displayIcon, EDISPICON_CLOCK);
 }
 
-static uint8_t coreButtonProbe(uint8_t btnIdx) {
-    return 0;
+static uint8_t coreButtonProbe(void *user, uint8_t btnIdx) {
+    state_t *state = (state_t *)user;
+    if (btnIdx >= 4) {
+        return 0;
+    }
+    
+    return state->buttonStates[btnIdx];
 }
 
 static display_hardware_status_t showTime(void *user, uint8_t hour, uint8_t minute, uint8_t second) {

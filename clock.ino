@@ -56,7 +56,7 @@ static display_7seg_t display = {
 
 #endif /* DISPLAY_USE_7SEG */
 
-static uint8_t buttonProbe(uint8_t idx) {
+static uint8_t buttonProbe(void *, uint8_t idx) {
   static uint8_t const pins[4] = { PIN_BUTTON_0, PIN_BUTTON_1, PIN_BUTTON_2, PIN_BUTTON_3 };
 
   if(idx > 3) {
@@ -68,6 +68,7 @@ static uint8_t buttonProbe(uint8_t idx) {
 
 static core_state_t coreState = {
   .display = &display.state,
+  .buttonProbeUser = NULL,
   .buttonProbe = buttonProbe,
   .externalMemory = NULL,
 };

@@ -9,13 +9,14 @@
 #include "timekeeper.h"
 #include "timesave_io.h"
 
-typedef uint8_t (*core_button_probe_t)(uint8_t btnIdx);
+typedef uint8_t (*core_button_probe_t)(void *user, uint8_t btnIdx);
 
 typedef struct core_state {
     // ------------------------------------
     // Set by hardware layer
     // ------------------------------------
     display_state_t *display;
+    void *buttonProbeUser;
     core_button_probe_t buttonProbe;
     eeprom_access_t *externalMemory;
 
