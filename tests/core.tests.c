@@ -98,6 +98,60 @@ UTEST_F(Core, SetHourButton) {
     ASSERT_EQ(second, 0);
 }
 
+UTEST_F(Core, SecondsPass) {
+    int rc;
+    uint8_t hour, minute, second;
+    timekeeper_t *tkClock;
+
+    tkClock = coreGetClock(&utest_fixture->coreState);
+    timekeeperSet(tkClock, 0, 0, 0);
+
+    for (int i = 0; i < 4500; i++) {
+        rc = coreElapsed(&utest_fixture->coreState, 1);
+    }
+
+    timekeeperGet(tkClock, &hour, &minute, &second);
+    ASSERT_EQ(hour, 0);
+    ASSERT_EQ(minute, 0);
+    ASSERT_EQ(second, 4);
+}
+
+UTEST_F(Core, MinutesPass) {
+    int rc;
+    uint8_t hour, minute, second;
+    timekeeper_t *tkClock;
+
+    tkClock = coreGetClock(&utest_fixture->coreState);
+    timekeeperSet(tkClock, 0, 0, 59);
+
+    for (int i = 0; i < 4500; i++) {
+        rc = coreElapsed(&utest_fixture->coreState, 1);
+    }
+
+    timekeeperGet(tkClock, &hour, &minute, &second);
+    ASSERT_EQ(hour, 0);
+    ASSERT_EQ(minute, 1);
+    ASSERT_EQ(second, 3);
+}
+
+UTEST_F(Core, HoursPass) {
+    int rc;
+    uint8_t hour, minute, second;
+    timekeeper_t *tkClock;
+
+    tkClock = coreGetClock(&utest_fixture->coreState);
+    timekeeperSet(tkClock, 0, 59, 59);
+
+    for (int i = 0; i < 4500; i++) {
+        rc = coreElapsed(&utest_fixture->coreState, 1);
+    }
+
+    timekeeperGet(tkClock, &hour, &minute, &second);
+    ASSERT_EQ(hour, 1);
+    ASSERT_EQ(minute, 0);
+    ASSERT_EQ(second, 3);
+}
+
 static uint8_t coreButtonProbe(void *user, uint8_t btnIdx) {
     state_t *state = (state_t *)user;
     if (btnIdx >= 4) {
