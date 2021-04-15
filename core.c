@@ -185,7 +185,7 @@ int coreLoop(core_state_t *state) {
 }
 
 int coreElapsed(core_state_t *state, uint8_t millisElapsed) {
-    timerAddTimeElapsed(TIMER_ID1, 1);
+    timerAddTimeElapsed(TIMER_ID1, millisElapsed);
     return 0;
 }
 
