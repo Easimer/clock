@@ -62,11 +62,14 @@ UTEST_F(Core, SetMinuteButton) {
     for (int i = 0; i < 5; i++) {
         utest_fixture->buttonStates[3] = 1;
         rc = coreElapsed(&utest_fixture->coreState, 25);
+        ASSERT_EQ(rc, 0);
         utest_fixture->buttonStates[3] = 0;
         rc = coreElapsed(&utest_fixture->coreState, 1);
+        ASSERT_EQ(rc, 0);
 
         for (int i = 0; i < ACTIONS_DOUBLE_CLICK_MAX_MILLISECONDS_SINCE_LAST_RELEASE; i++) {
             rc = coreElapsed(&utest_fixture->coreState, 1);
+            ASSERT_EQ(rc, 0);
         }
     }
 
@@ -87,9 +90,12 @@ UTEST_F(Core, SetHourButton) {
     for (int i = 0; i < 5; i++) {
         utest_fixture->buttonStates[3] = 1;
         rc = coreElapsed(&utest_fixture->coreState, 1);
+        ASSERT_EQ(rc, 0);
         rc = coreElapsed(&utest_fixture->coreState, ACTIONS_LONG_PRESS_MIN_MILLISECONDS);
+        ASSERT_EQ(rc, 0);
         utest_fixture->buttonStates[3] = 0;
         rc = coreElapsed(&utest_fixture->coreState, 1);
+        ASSERT_EQ(rc, 0);
     }
 
     timekeeperGet(tkClock, &hour, &minute, &second);
@@ -108,6 +114,7 @@ UTEST_F(Core, SecondsPass) {
 
     for (int i = 0; i < 4500; i++) {
         rc = coreElapsed(&utest_fixture->coreState, 1);
+        ASSERT_EQ(rc, 0);
     }
 
     timekeeperGet(tkClock, &hour, &minute, &second);
@@ -126,6 +133,7 @@ UTEST_F(Core, MinutesPass) {
 
     for (int i = 0; i < 4500; i++) {
         rc = coreElapsed(&utest_fixture->coreState, 1);
+        ASSERT_EQ(rc, 0);
     }
 
     timekeeperGet(tkClock, &hour, &minute, &second);
@@ -144,12 +152,31 @@ UTEST_F(Core, HoursPass) {
 
     for (int i = 0; i < 4500; i++) {
         rc = coreElapsed(&utest_fixture->coreState, 1);
+        ASSERT_EQ(rc, 0);
     }
 
     timekeeperGet(tkClock, &hour, &minute, &second);
     ASSERT_EQ(hour, 1);
     ASSERT_EQ(minute, 0);
     ASSERT_EQ(second, 3);
+}
+
+UTEST_F(Core, RegularSave) {
+    int rc;
+
+    for (int min = 0; min < TIMESAVE_INTERVAL_MINUTES; min++) {
+        for (int seconds = 0; seconds < 60; seconds++) {
+            for (int ms = 0; ms < 1000; ms++) {
+                rc = coreElapsed(&utest_fixture->coreState, ms);
+                ASSERT_EQ(rc, 0);
+            }
+        }
+    }
+
+    rc = coreLoop(&utest_fixture->coreState);
+    ASSERT_EQ(rc, 0);
+
+    ASSERT_NE(utest_fixture->memory.buffers.parameter[1], 0);
 }
 
 static uint8_t coreButtonProbe(void *user, uint8_t btnIdx) {
