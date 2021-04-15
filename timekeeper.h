@@ -23,6 +23,10 @@ typedef struct timekeeper timekeeper_t;
 #define TIMEKEEPER_SETUP_BUFFER_IN(container, name) \
     container->name = (timekeeper_t*)container->tkbuf_##name;
 
+#define TIMEKEEPER_CREATE_ON_STACK(name) \
+    uint8_t tkbuf_##name[TIMEKEEPER_BUFFER_SIZE]; \
+    timekeeper_t *name = (timekeeper_t*)tkbuf_##name;
+
 #ifdef __cplusplus
 extern "C" {
 #endif
