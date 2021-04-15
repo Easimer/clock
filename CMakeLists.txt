@@ -34,6 +34,7 @@ set(SRC_CORE
 
 set(SRC_TESTS
   tests/actions.tests.c
+  tests/core.tests.c
   tests/display.tests.c
   tests/eeprom_he.tests.c
   tests/timekeeper.tests.c

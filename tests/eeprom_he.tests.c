@@ -18,7 +18,8 @@ UTEST_F_SETUP(EepromHE) {
     ramEepromClear(&utest_fixture->memory);
 
     utest_fixture->descriptor.access = &utest_fixture->access;
-    utest_fixture->descriptor.address = 0;
+    uint16_t statusBufferOffset = (uint16_t)&(((ram_eeprom_buffer_t *)NULL)->buffers.status);
+    utest_fixture->descriptor.address = statusBufferOffset;
     utest_fixture->descriptor.elementCount = EEPROM_ELEMENTS;
     utest_fixture->descriptor.elementSize = sizeof(uint32_t);
     utest_fixture->descriptor.flags = EMHE_F_NONE;

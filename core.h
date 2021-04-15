@@ -42,6 +42,8 @@ int coreInit(core_state_t *state);
 int coreLoop(core_state_t *state);
 int coreElapsed(core_state_t *state, uint8_t millisElapsed);
 
+timekeeper_t *coreGetClock(core_state_t *state);
+
 #ifdef __cplusplus
 }
 #endif

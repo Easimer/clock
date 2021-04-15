@@ -189,3 +189,7 @@ int coreElapsed(core_state_t *state, uint8_t millisElapsed) {
     return 0;
 }
 
+
+timekeeper_t *coreGetClock(core_state_t *state) {
+    return state->tkTime;
+}
